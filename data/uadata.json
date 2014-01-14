@@ -1,0 +1,37 @@
+{
+"default":{"general.appname.override":"",
+"general.appversion.override":"",
+"general.platform.override":"",
+"general.useragent.override":"",
+"general.useragent.vendor":"",
+"general.useragent.vendorSub":""},
+
+"FirefoxOS":{"general.appname.override":"Netscape",
+"general.appversion.override":"5.0 ()",
+"general.platform.override":"Win32",
+"general.useragent.override":"Mozilla/5.0 (Mobile; rv:18.0) Gecko/18.0 Firefox/18.0",
+"general.useragent.vendor":"",
+"general.useragent.vendorSub":""},
+
+"FirefoxOS1.1":{"general.appname.override":"Netscape",
+"general.appversion.override":"5.0 ()",
+"general.platform.override":"Win32",
+"general.useragent.override":"Mozilla/5.0 (Mobile; rv:18.1) Gecko/18.1 Firefox/18.1",
+"general.useragent.vendor":"",
+"general.useragent.vendorSub":""},
+
+"iPhone":{"general.appname.override":"",
+"general.appversion.override":"",
+"general.platform.override":"iPhone",
+"general.useragent.override":"Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3",
+"general.useragent.vendor":"Apple Computer, Inc.",
+"general.useragent.vendorSub":""},
+
+"FirefoxAndroid" : {"general.appname.override":"Netscape",
+"general.appversion.override":"5.0 ()",
+"general.platform.override":"Win32",
+"general.useragent.override":"Mozilla/5.0 (Android; Mobile; rv:23.0) Gecko/23.0 Firefox/23.0",
+"general.useragent.vendor":"",
+"general.useragent.vendorSub":""}
+
+}

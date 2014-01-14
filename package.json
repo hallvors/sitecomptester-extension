@@ -1,0 +1,1 @@
+{"license": "", "description": "Experimental site compat problem status checker", "contributors": [], "author": "hallvord", "url": "", "dependencies": ["api-utils", "addon-kit"], "version": "initial.rev231", "lib": "lib", "fullName": "SiteCompTester", "main": "main", "id": "jid0-YGkBwWloUH9WvWCrptCWIMcpcPg", "name": "sitecomptester"}
