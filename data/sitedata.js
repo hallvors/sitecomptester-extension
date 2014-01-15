@@ -417,6 +417,12 @@ var bugdata = {
     },
     '759111' : {
         url:'http://www.live.com/',
+        ua: 'FirefoxAndroid',
+        /* URL of login page contains a redirect back to the /m/ URL for the mobile site */
+        steps: [function(){ return location.href.indexOf('wreply=https:%2F%2Fmail.live.com%2Fm%2F')>-1 }]
+    },
+    '957853' : {
+        url:'http://www.live.com/',
         ua: 'FirefoxOS',
         /* URL of login page contains a redirect back to the /m/ URL for the mobile site */
         steps: [function(){ return location.href.indexOf('wreply=https:%2F%2Fmail.live.com%2Fm%2F')>-1 }]
@@ -755,12 +761,12 @@ var automated_tests={
 	"826958" : {
 		url: 'http://ebay.com',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("hp.mobileweb.ebay.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return location.hostname.indexOf("m.ebay.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
 	"828386" : {
 		url: 'http://ebay.es',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("hp.mobileweb.ebay.es")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return location.hostname.indexOf("m.ebay.es")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
 	"876423" : {
 		url: 'http://economist.com',
