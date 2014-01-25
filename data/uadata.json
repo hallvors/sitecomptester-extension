@@ -32,6 +32,13 @@
 "general.platform.override":"Win32",
 "general.useragent.override":"Mozilla/5.0 (Android; Mobile; rv:23.0) Gecko/23.0 Firefox/23.0",
 "general.useragent.vendor":"",
+"general.useragent.vendorSub":""},
+
+"FirefoxAndroidTablet" : {"general.appname.override":"Netscape",
+"general.appversion.override":"5.0 ()",
+"general.platform.override":"Win32",
+"general.useragent.override":"Mozilla/5.0 (Android; Tablet; rv:25.0) Gecko/25.0 Firefox/25.0",
+"general.useragent.vendor":"",
 "general.useragent.vendorSub":""}
 
 }
