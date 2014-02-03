@@ -1,9 +1,9 @@
-phantom.injectJs('C:\\mozilla\\extensions\\sitecomptester\\data\\sitedata.js');
+phantom.injectJs('data/sitedata.js');
 
 var testsFile = 'http://hallvord.com/temp/moz/stdTests.js';
-var outfile = 'C:\\mozilla\\mobilewebcompat\\data\\testing\\results-test.csv';
+var outfile = 'results.csv';
 var results=[];
-var uadata = require('C:\\mozilla\\extensions\\sitecomptester\\data\\uadata.json');
+var uadata = require('data/uadata.json');
 
 var page = require('webpage').create();
 var ua = page.settings.userAgent = "Mozilla/5.0 (Mobile; rv:26.0) Gecko/26.0 Firefox/26.0";
@@ -53,7 +53,7 @@ page.onResourceReceived = function (res) {
 };
 
 page.onLoadFinished = function (status, url, isFrame) {
-	console.log('onLoadFinished '+status+' '+url+' '+isFrame);
+	//console.log('onLoadFinished '+status+' '+url+' '+isFrame);
 	
 	if(xhrTestUrl && page.content === '<html><head></head><body></body></html>'){
 		// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
@@ -74,10 +74,11 @@ function nextBug () {
 	bug = bugs[bugIdx];
 	if(! bug in bugdata){
 		page.open('data:text/html,<html><body><form method="post" action="http://arewecompatibleyet.hallvord.com/data/testing/upload.php"><input type=submit><textarea style="visibility:hidden" name="csvdata">'+encodeURIComponent(csvStr)+'</textarea></form><pre>'+encodeURIComponent(csvStr));
+		console.log('Done. Results were written to '+outfile)
 	}else if (bugdata[bug]) {
 		ua = page.settings.userAgent = uadata[bugdata[bug].ua]['general.useragent.override'];
 		if (bugdata[bug].testType === 'xhr') {
-			console.log('xhr test..')
+			//console.log('xhr test..')
 			xhrTestUrl = bugdata[bug].url;
 			loadSite();
 		}else{
@@ -114,7 +115,7 @@ function runTestStep () {
 		if (bugdata[bug].steps.length>currentTest) {
 			try{
 				page.evaluateJavaScript('var unsafeWindow=window;');
-				console.log('('+bugdata[bug].steps[currentTest].toString()+')()')
+				//console.log('('+bugdata[bug].steps[currentTest].toString()+')()')
 				result = page.evaluateJavaScript('('+bugdata[bug].steps[currentTest].toString()+')()');
 				if(result == 'delay-and-retry' && retryCount<5){
 					jobTime(runTestStep, 1000);
