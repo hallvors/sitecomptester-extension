@@ -1,8 +1,10 @@
 from marionette import Marionette
-import base64, json, re, os, subprocess
+import base64, json, re, os, subprocess, time, urlparse
 
-dirname = 'C:\\mozilla\\testing\\newtests\\'
-filename = dirname + 'missing.txt'
+dirname = 'C:\\mozilla\\testing\\video\\'
+filename = dirname + 'sites.txt'
+start_at = 0
+run_until = None
 if not os.path.exists(dirname+'comp'):
     os.mkdir(dirname+'comp')
 
@@ -63,6 +65,8 @@ def empty_firefox_cache(marionette_instance):
     marionette_instance.set_context(marionette_instance.CONTEXT_CONTENT)
 
 def load_and_check(url, type=''):
+    #print url
+    hostname = urlparse.urlparse(url)[1]
     try:
         m.delete_all_cookies()
         m.delete_session()
@@ -76,8 +80,9 @@ def load_and_check(url, type=''):
         except:
             print 'Error loading '+url
             return
+    time.sleep(1)
     ss = base64.b64decode(m.screenshot())
-    ss_f = open(dirname+type+("%03d"%i)+'.png', 'wb')
+    ss_f = open(dirname+type+("%03d-"%i)+hostname+'.png', 'wb')
     ss_f.write(ss)
     ss_f.close()
     check_results = inject_js()
@@ -85,7 +90,6 @@ def load_and_check(url, type=''):
 
 
 i=0
-start_at = 194
 has_bug_data = False
 out_obj = {}
 out_missing = {}
@@ -153,19 +157,18 @@ with open(filename, 'r') as handle:
                 }
         # If we have two screenshots, join them
         f = ("%03d"%i)+'.png'
-        if os.path.exists(dirname+os.sep+'wk-spoof'+f) and os.path.exists(dirname+os.sep+f):
+        if os.path.exists(dirname+os.sep+'wk-spoof'+f) and os.path.exists(dirname+os.sep+f) and os.path.exists("c:\\Program Files (x86)\\IrfanView\\"):
             subprocess.call(["c:\\Program Files (x86)\\IrfanView\\i_view32.exe", '/panorama=(1,%s%s,%swk-spoof%s)' % (dirname,f,dirname,f), '/convert %scomp\\%s' % (dirname,f)], bufsize=100)
 
         i+=1
-        if i>194:
-            if has_bug_data:
-                f = open(dirname+'sitedata-automated.js', 'w')
-                json_str = json.dumps(out_obj, indent=4)
-                json_str = json_str.replace('"function', 'function').replace(';}"', ';}').replace('\\"', '"') #we're not shipping JSON, we're shipping JS..
-                f.write(json_str)
-                f.close()
-                f = open(dirname+'sitedata-missing.js', 'w')
-                f.write(json.dumps(out_missing, indent=4))
-                f.close()
+        if has_bug_data:
+            f = open(dirname+'sitedata-automated.js', 'w')
+            json_str = json.dumps(out_obj, indent=4)
+            json_str = json_str.replace('"function', 'function').replace(';}"', ';}').replace('\\"', '"') #we're not shipping JSON, we're shipping JS..
+            f.write(json_str)
+            f.close()
+            f = open(dirname+'sitedata-missing.js', 'w')
+            f.write(json.dumps(out_missing, indent=4))
+            f.close()
+        if(run_until and i > run_until):
             quit()
-
