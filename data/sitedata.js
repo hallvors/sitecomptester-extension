@@ -10,6 +10,27 @@ var hosts = {};
 
 */
 var bugdata = {
+    "755800" : {
+        url: 'http://etsy.com',
+         ua: "FirefoxOS",
+        steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
+    },
+    "933642": {
+        "url": "http://www.mysmartprice.com/", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl() && location.pathname.indexOf('m/')>-1;}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "mysmartprice.com isn't redirecting to mobile site on Firefox OS"
+    },
+    "933652": {
+        "url": "http://gaana.com/", 
+        "steps": [
+            function(){return location.hostname === 'touch.gaana.com';}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "gaana.com isn't redirecting to mobile site on Firefox OS"
+    }, 
     "935895": {
         "url": "http://uk.eonline.com", 
         "steps": [
@@ -270,10 +291,15 @@ var bugdata = {
         "ua": "FirefoxAndroidTablet", 
         "steps": [
             function(){
-            for(var i=0,elms=document.getElementsByTagName('*'),el;el=elms[i];i++){ 
-                if('-moz-transform' in el.style)return false; 
-                if ((('MozTransform' in el.style) || ('transform' in el.style)) && ((el.style.MozTransform !='none') || (el.style.transform!='none'))) {return true;}; 
-            } return false;}
+                if(window._moz_793216_clicked){
+                    return window._moz_transform_was_set;
+                }
+                window._moz_transform_was_set=false; 
+                CSS2Properties.prototype.__defineSetter__('-moz-transform', function(str){window._moz_transform_was_set=true;});
+                for(var i=0;i<document.links.length;i++)if(document.links[i].href.indexOf('imgrefurl')>-1){document.links[i].click();break;}
+                window._moz_793216_clicked = true;
+                return 'delay-and-retry';
+            }
         ], 
         "title": "images.google.com image single view carrousel is stacked on tablet"
     }, 
@@ -371,6 +397,7 @@ var bugdata = {
         ua:'FirefoxAndroid',
         steps:[function(){
             var elm = document.getElementsByClassName('media-strip')[0];
+            if(!elm)return 'delay-and-retry';
             return elm && elm.getElementsByTagName('picture').length>0?true:false;
         }]
     },
@@ -423,7 +450,7 @@ var bugdata = {
     '795319' : {
         url:'http://m.bing.com/maps',
         ua:'FirefoxOS',
-        steps:[function(){ return document.scripts.length > 0; }]
+        steps:[function(){ return document.scripts.length > 5; }]
     },
     '899541' : {
         url:'http://blackberry.com',
@@ -1453,7 +1480,7 @@ var automated_tests={
 	},
 	"790193" : {
 		url: 'http://m.inc.com',
-		 ua: "FirefoxOS",
+		 ua: "FirefoxAndroid",
 		steps:[function(){return hasViewportMeta()}]
 	},
 	"884264" : {
@@ -1886,7 +1913,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasHandheldFriendlyMeta() && hasMobileOptimizedMeta() && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
-	"763518" : {
+	"799881" : {
 		url: 'http://wikipedia.org',
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
@@ -2071,7 +2098,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta()}]
 	},
-	"766941" : {
+	"799884" : {
 		url: 'http://yelp.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
@@ -2130,11 +2157,6 @@ var automated_tests={
 		url: 'http://m.aukro.cz/',
 		 ua: "FirefoxOS",
 		steps:[function(){return hasMobileOptimizedMeta() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
-	"755800" : {
-		url: 'http://etsy.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
 	"921556" : {
 		url: 'http://taobao.com',
@@ -2201,9 +2223,14 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
+    "966184" : {
+        url: 'http://www.national-lottery.co.uk/',
+         ua: "FirefoxOS",
+        steps:[function(){return location.hostname.indexOf("m.national-lottery.co.uk")>-1 && hasViewportMeta()}]
+    },
 	"785374" : {
 		url: 'http://www.national-lottery.co.uk/',
-		 ua: "FirefoxOS",
+		 ua: "FirefoxAndroid",
 		steps:[function(){return location.hostname.indexOf("m.national-lottery.co.uk")>-1 && hasViewportMeta()}]
 	},
 	"791520" : {
@@ -2766,14 +2793,6 @@ var automated_tests={
         "ua": "FirefoxOS", 
         "title": "takealot.com sends desktop site to Firefox OS"
     }, 
-    "918643": {
-        "url": "http://read.amazon.com/", 
-        "steps": [
-            function(){return hasViewportMeta();}
-        ], 
-        "ua": "FirefoxOS", 
-        "title": "kindle cloud reader incorrectly detects FirefoxOS as Android"
-    }, 
     "932876": {
         "url": "http://www.oneindia.in/", 
         "steps": [
@@ -3258,14 +3277,6 @@ var automated_tests={
         "ua": "FirefoxOS", 
         "title": "groupon.com serves desktop sites to Firefox OS"
     }, 
-    "933642": {
-        "url": "http://www.mysmartprice.com/", 
-        "steps": [
-            function(){return mobileLinkOrScriptUrl();}
-        ], 
-        "ua": "FirefoxOS", 
-        "title": "mysmartprice.com isn't redirecting to mobile site on Firefox OS"
-    }, 
     "933601": {
         "url": "http://www.axisbank.com/", 
         "steps": [
@@ -3489,14 +3500,6 @@ var automated_tests={
         ], 
         "ua": "FirefoxOS", 
         "title": "cookpad.com sends desktop site to Firefox OS"
-    }, 
-    "933652": {
-        "url": "http://gaana.com/", 
-        "steps": [
-            function(){return hasViewportMeta();}
-        ], 
-        "ua": "FirefoxOS", 
-        "title": "gaana.com isn't redirecting to mobile site on Firefox OS"
     }, 
     "933653": {
         "url": "http://www.jagran.com/", 
