@@ -66,7 +66,7 @@ def empty_firefox_cache(marionette_instance):
 
 def load_and_check(url, type=''):
     #print url
-    hostname = urlparse.urlparse(url)[1]
+    location = urlparse.urlparse(url)
     try:
         m.delete_all_cookies()
         m.delete_session()
@@ -82,7 +82,7 @@ def load_and_check(url, type=''):
             return
     time.sleep(1)
     ss = base64.b64decode(m.screenshot())
-    ss_f = open(dirname+type+("%03d-"%i)+hostname+'.png', 'wb')
+    ss_f = open(dirname+type+("%03d-"%i)+location.hostname+'.png', 'wb')
     ss_f.write(ss)
     ss_f.close()
     check_results = inject_js()
@@ -104,6 +104,7 @@ with open(filename, 'r') as handle:
     	if i<start_at or url.strip() == '':
     		i+=1
     		continue
+        location = urlparse.urlparse(url)
         empty_firefox_cache(m)
         spoof_firefox_os()
         url = url.strip()
@@ -156,8 +157,8 @@ with open(filename, 'r') as handle:
                     'title':parts[1]
                 }
         # If we have two screenshots, join them
-        f = ("%03d"%i)+'.png'
-        if os.path.exists(dirname+os.sep+'wk-spoof'+f) and os.path.exists(dirname+os.sep+f) and os.path.exists("c:\\Program Files (x86)\\IrfanView\\"):
+        f = ("%03d-"%i)+location.hostname+'.png'
+        if os.path.exists(dirname+'wk-spoof'+f) and os.path.exists(dirname+f) and os.path.exists("c:\\Program Files (x86)\\IrfanView"):
             subprocess.call(["c:\\Program Files (x86)\\IrfanView\\i_view32.exe", '/panorama=(1,%s%s,%swk-spoof%s)' % (dirname,f,dirname,f), '/convert %scomp\\%s' % (dirname,f)], bufsize=100)
 
         i+=1
