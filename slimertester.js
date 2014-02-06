@@ -112,7 +112,7 @@ function runTestStep () {
 	if(xhrTestUrl)return; // handled elsewhere..
 	if (page.evaluateJavaScript('typeof hasViewportMeta === "function"')) {
 
-		if (bugdata[bug].steps.length>currentTest) {
+		if (bugdata[bug] && bugdata[bug].steps.length>currentTest) {
 			try{
 				page.evaluateJavaScript('var unsafeWindow=window;');
 				//console.log('('+bugdata[bug].steps[currentTest].toString()+')()')
@@ -126,7 +126,6 @@ function runTestStep () {
 			}catch(e){
 				result = 'EXCEPTION: '+e.message;
 			}
-			console.log(bug+' result: '+result+' '+bugdata[bug].title);
 			currentTest++;
 			retryCount=0;
 			if (bugdata[bug].steps[currentTest]) {
@@ -154,6 +153,7 @@ function runTestStep () {
     }
 
 function registerTestResult (result, comment) {
+	console.log(bug+' result: '+result+' '+(bugdata[bug].title||'')+' '+(comment||''));
 	results.push([bug, datetime(), ua, result, bugdata[bug].title, comment]);
 	writeResultsToFile();
 }
