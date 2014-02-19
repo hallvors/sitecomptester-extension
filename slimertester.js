@@ -1,7 +1,8 @@
 phantom.injectJs('data/sitedata.js');
 
 var testsFile = 'http://hallvord.com/temp/moz/stdTests.js';
-var outfile = 'results.csv';
+var date = new Date();
+var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
 var results=[];
 var uadata = require('data/uadata.json');
 
@@ -13,7 +14,7 @@ page.customHeaders = {
 "Accept-Encoding": "gzip, deflate",
 "Connection": "keep-alive"
 };
-page.viewportSize = { width:320, height:580 };
+page.viewportSize = { width:360, height:640 };
 
 runSpecificBugTest = phantom.args[0]; // we can pass in a bug number on the command line to run that test only..
 
@@ -29,7 +30,11 @@ function jobTime(doJob, delay){
 
 page.onResourceRequested = function (req) {
 	//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header.. 
-    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})')
+    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})');
+    if(bug && bugdata[bug] && bugdata[bug].injectScript){
+    	//console.log('injecting: '+bugdata[bug].injectScript)
+    	page.evaluateJavaScript(bugdata[bug].injectScript);
+    }
 };
 
 page.onResourceError = function (res) {
@@ -96,7 +101,6 @@ function loadSite(){
 				page.includeJs(testsFile, function(){
 					jobTime(runTestStep, 100);
 				});
-				//page.render('yahoo-home-gecko.png')
 			}
 		}else{
 			console.log('Failed to load site for '+bug+' '+bugdata[bug].url);
