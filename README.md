@@ -41,9 +41,10 @@ An individual test is embedded in a JavaScript object:
 
 ## Properties
 
-All properties but **URL**, **steps** and **ua** are optional.
+All properties but **BUG_ID**, **URL**, **steps** and **ua** are optional.
 
- * **URL** The URL to launch
+ * **BUG_ID** All tests are associated with a bug number, this number is the name of the property that references this test in the testdata object.
+ * **URL** The URL to launch in order to run the test.
  * **steps** An array of functions. The last function in the array is expected to return true or false to indicate whether the test passed. It can also return a string to indicate an unexpected condition (i.e. 'element not found').
  * **ua** An indication of how the browser should identify itself for this test. Valid values are defined in data/uadata.json. 
  * **injectScript** If a test relies on a certain page / environment state, this property can be defined. Any script specified here will be injected into the page as soon as possible when it loads. **Not currently implemented for extension testing - slimerjs only**.
@@ -55,12 +56,12 @@ All properties but **URL**, **steps** and **ua** are optional.
 
 Tests can always assume that these methods are available:
 
-* **hasViewportMeta()** returns true if the page has a META element with name viewport
-* **hasHandheldFriendlyMeta()** returns true if the page has a META element with name handheldfriendly
-* **hasMobileOptimizedMeta()** returns true if the page has a META element with name mobileoptimized
-* **mobileLinkOrScriptUrl(str)** returns true if the page has either LINK href or SCRIPT src attributes that contain the string 'mobile' (or the string passed to this method)
-* **hasVideoTags()** returns true if the page contains HTML5 VIDEO tags
-* **noWapContentPlease()** used with XHR tests to look for WAP pages
+* **hasViewportMeta()** returns true if the page has a META element with name viewport.
+* **hasHandheldFriendlyMeta()** returns true if the page has a META element with name handheldfriendly.
+* **hasMobileOptimizedMeta()** returns true if the page has a META element with name mobileoptimized.
+* **mobileLinkOrScriptUrl(str)** returns true if the page has either LINK href or SCRIPT src attributes that contain the string 'mobile' (or the string passed to this method).
+* **hasVideoTags()** returns true if the page contains HTML5 VIDEO tags.
+* **noWapContentPlease()** used with XHR tests to look for WAP pages.
 
 
 * **cssCheck(*classNameList*, *propertiesThatMustExist*)** - method that returns true if one of the class names has one of the properties. *This method is less used than the others and might be dropped or changed*.
