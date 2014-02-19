@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html><head><title>hi sitedata</title><script src="data/sitedata.js"></script>
+<style type="text/css">dd.steps{white-space: pre-wrap} dt{font-weight: bold;}</style>
+</head>
+<body>
+<datalist style="display:none" id="allbugs"></datalist>
+<script>
+var bugs = Object.keys(bugdata);
+datalist = document.getElementById('allbugs'), a=document.createElement('a');
+bugs.forEach(function(nr){
+	datalist.appendChild(new Option(nr, nr));
+	a.href = bugdata[nr].url;
+	datalist.appendChild(new Option(a.hostname, a.hostname));
+});
+
+addp('Number of tests '+bugs.length);
+function search(str){
+	var dl = document.getElementById('buglist'), details={};
+	dl.innerHTML='';
+	if (str in bugdata) { // assumed bug number
+		details[str] = bugdata[str];
+	}else if(str.length>=2){
+		bugs.forEach(function(nr){
+			if(bugdata[nr].url.indexOf(str)>-1)details[nr] = bugdata[nr];
+		});
+	}
+	for(var nr in details){
+		var obj = details[nr];
+		dl.appendChild(document.createElement('dt')).appendChild(document.createTextNode(nr));
+		dl.appendChild(document.createElement('dd'));
+		var subdl = dl.lastChild.appendChild(document.createElement('dl'));
+		for(var prop in obj){
+			subdl.appendChild(document.createElement('dt')).appendChild(document.createTextNode(prop));
+			subdl.appendChild(document.createElement('dd')).appendChild(document.createTextNode(obj[prop]));
+			subdl.lastChild.className = prop;
+		}
+
+	}
+
+}
+function addp(str){
+	document.body.appendChild(document.createElement('p')).appendChild(document.createTextNode(str));
+}
+function filterme(str){
+	var pre=document.getElementsByTagName('pre')[0];pre.innerHTML = '';
+	var lines = str.split(/\r?\n/g);
+	lines.forEach(function(line){
+		var details = line.split(/\t/);
+		if(! (details[0] in bugdata) ){
+			pre.appendChild(document.createTextNode(line+'\n'))
+		}
+	});
+}
+</script>
+<p>Search by bug or hostname: <input type="text" onkeyup="search(this.value)" onchange="search(this.value)" list="allbugs"></p>
+<dl id="buglist"></dl>
+<textarea onchange="filterme(this.value)"></textarea>
+<pre></pre>
+</body></html>
