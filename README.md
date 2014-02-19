@@ -1,7 +1,7 @@
-sitecomptester-extension
-========================
+# sitecomptester-extension
+## Background
 
-Firefox extension which runs in-browser site compatibility test
+This is a Firefox extension (and slimerjs test runner) to run in-browser site compatibility test
 
 This extension comes with a list of "tests" in JSON format - found in the data/sitedata.js file. Tests are run against live sites.
 
@@ -14,9 +14,11 @@ However, before doing a test run it's best to do the following:
  * Delete session data (cache, cookies etc.)
  * Make sure log-ins for any sites you need to log in to are stored in the password manager in the profile you will use for testing. (These are used by the extension for logging in, *not yet* used by the slimerjs test runner)
 
+*Note*: This work originally started with an extension - recently most of the development is happening for the slimerjs test runner.
 
-Test format
-=======================
+
+
+## Test format
 
 An individual test is embedded in a JavaScript object:
 
@@ -32,13 +34,13 @@ An individual test is embedded in a JavaScript object:
     }
 
 
-Structure explained
-===================
+## Structure explained
+
  * All tests must refer to a bug number. There can only be one test per bug.
  * The object has some meta data, and some code. As it's saved in a JS file and not JSON, we include function expressions directly inside an array.
 
-Properties
-=======
+## Properties
+
 All properties but **URL**, **steps** and **ua** are optional.
 
  * **URL** The URL to launch
@@ -48,8 +50,8 @@ All properties but **URL**, **steps** and **ua** are optional.
  * **title** Optionally add the bug's summary to the test. This makes the test file more readable and the tests easier to review.
  * **testType** The only valid value for this property is 'xhr'. This means the test can be run by doing an XMLHttpRequest for the URL and pass the response to the function(s) listed in steps. **Not completely implementable in slimerjs**.
 
-Predefined functions
-====
+## Predefined functions
+
 
 Tests can always assume that these methods are available:
 
