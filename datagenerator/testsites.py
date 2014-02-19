@@ -1,15 +1,35 @@
 from marionette import Marionette
-import base64, json, re, os, subprocess, time, urlparse
+import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse
 
-dirname = 'C:\\mozilla\\testing\\video\\'
+dirname = 'C:\\mozilla\\testing\\missing-2014-02-18\\'
 filename = dirname + 'sites.txt'
 start_at = 0
 run_until = None
+all_data = {}
+
+ignored_bugs = []
+for line in open(dirname+'..'+os.path.sep+'ignored_bugs.txt'):
+    if line[0] == '#':
+        continue
+    ignored_bugs.append(line.strip())
+parser = argparse.ArgumentParser(description=("Test a list of sites, make screenshots"))
+parser.add_argument("-i", dest='index', type=int, help="the index in the list of the site you want to test, 0-based", default=None)
+args = parser.parse_args()
+if args.index is not None:
+    start_at = args.index
+    run_until = args.index
+
 if not os.path.exists(dirname+'comp'):
     os.mkdir(dirname+'comp')
+if not os.path.exists(dirname+'comp/.htaccess'):
+    f = open(dirname+'comp/.htaccess', 'w')
+    f.write("""Header add Access-Control-Allow-Origin "*"
+Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT\"""")
+    f.close()
 
 m = Marionette(host='localhost', port=2828)
 m.start_session()
+file_index = []
 
 def set_mozilla_pref(marionette_instance, name, value):
     marionette_instance.set_context(marionette_instance.CONTEXT_CHROME)
@@ -29,10 +49,18 @@ def spoof_firefox_os():
     set_mozilla_pref(m, 'general.useragent.platform', '')
 
 def spoof_safari_ios():
-    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543a Safari/419.3')
+    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/546.10 (KHTML, like Gecko) Version/6.0 Mobile/7E18WD Safari/8536.25')
     set_mozilla_pref(m, 'general.useragent.appName', 'Netscape')
+    set_mozilla_pref(m, 'general.useragent.appVersion', '5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/546.10 (KHTML, like Gecko) Version/6.0 Mobile/7E18WD Safari/8536.25')
     set_mozilla_pref(m, 'general.useragent.vendor', 'Apple Computer, Inc.')
     set_mozilla_pref(m, 'general.useragent.platform', 'iPhone')
+
+def spoof_android_browser():
+    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Linux; U; Android 4.1.1; en-us; HTC_ONE_X Build/JRO03C) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
+    set_mozilla_pref(m, 'general.useragent.appName', 'Netscape')
+    set_mozilla_pref(m, 'general.useragent.appVersion', '5.0 (Linux; U; Android 4.1.1; en-us; HTC_ONE_X Build/JRO03C) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
+    set_mozilla_pref(m, 'general.useragent.vendor', 'Google Inc.')
+    set_mozilla_pref(m, 'general.useragent.platform', 'Linux armv71')
 
 def inject_js():
     m.set_context(m.CONTEXT_CONTENT)
@@ -57,6 +85,19 @@ def inject_js():
     """
     return m.execute_script(js)
 
+def diff_ratio(s1, s2):
+    s = difflib.SequenceMatcher(None, s1, s2)
+    return s.quick_ratio()
+
+def read_json_file(path):
+    if os.path.exists(path):
+        idx_f = open(path)
+        data = json.loads(idx_f.read())
+        idx_f.close()
+    else:
+        data = {} 
+    return data
+
 def empty_firefox_cache(marionette_instance):
     marionette_instance.set_context(marionette_instance.CONTEXT_CHROME)
     marionette_instance.execute_script('Components.classes["@mozilla.org/network/cache-service;1"].getService(Components.interfaces.nsICacheService).evictEntries(Components.interfaces.nsICache.STORE_ON_DISK);')
@@ -80,8 +121,21 @@ def load_and_check(url, type=''):
         except:
             print 'Error loading '+url
             return
-    time.sleep(1)
-    ss = base64.b64decode(m.screenshot())
+    time.sleep(3)
+    # I want a screenshot of the viewport. For this purpose, I consider that better than getting the full page
+    # However, WebDriver spec says implementations *should* do the full page thing, and AFAIK there's no convenient way
+    # to opt-in to only take the viewport..
+    elm = None
+    try:
+        m.execute_script('(function(){var elm=document.createElement(\'overlay\');elm.setAttribute(\'style\', \'display:block; position:fixed;top:0;left:0;right:0;bottom:0\');document.body.appendChild(elm)})()')
+        elm = m.find_elements('tag name', 'overlay')
+    except:
+        pass
+    if elm:
+        elm = elm[0]
+        ss = base64.b64decode(m.screenshot(element=elm))
+    else:
+        ss = base64.b64decode(m.screenshot())
     ss_f = open(dirname+type+("%03d-"%i)+location.hostname+'.png', 'wb')
     ss_f.write(ss)
     ss_f.close()
@@ -91,31 +145,41 @@ def load_and_check(url, type=''):
 
 i=0
 has_bug_data = False
-out_obj = {}
-out_missing = {}
+# If we don't start at 0, we must take care to not overwrite old results..
+if start_at > 0 and os.path.exists(dirname+'comp'+os.path.sep+'idx.js'):
+    file_index = read_json_file(dirname+'comp'+os.path.sep+'idx.js')
+# Get current test data..
+all_data = read_json_file(dirname+'..'+os.path.sep+'data.js')
+out_obj = read_json_file(dirname+'sitedata-automated.js')
+out_missing = read_json_file(dirname+'sitedata-missing.js')
+
 with open(filename, 'r') as handle:
     for url in handle:
         parts = url.split("\t")
         if len(parts) == 2:
+            i+=1
             continue # We're loading a tab-separated file with bug \t summary \t url, and there is no URL..
         elif len(parts) == 3:
             url = parts[2]
             has_bug_data = True
+            if parts[0] in ignored_bugs: # sorry, we're just not interested in you..
+                i+=1
+                continue
     	if i<start_at or url.strip() == '':
     		i+=1
     		continue
+        if not '://' in url:
+            url = 'http://%s' % url
+        url = url.strip().rstrip('\r\n')
         location = urlparse.urlparse(url)
+        print str(i) + ' : ' + url
         empty_firefox_cache(m)
         spoof_firefox_os()
-        url = url.strip()
-        if not ('http://' in url or 'https://' in url):
-            url = "http://%s" % url
-        print str(i) + ' : ' + url
         fxresults = load_and_check(url)
         #print 'firefox spoof results: '+fxresults
         empty_firefox_cache(m)
         spoof_safari_ios()
-        wkresults = load_and_check(url, 'wk-spoof')
+        wkresults = load_and_check(url, 'wk-spoof-')
         #print 'AppleWebKit spof results', wkresults
         compsteps = []
         if fxresults is not None and wkresults is not None:
@@ -130,6 +194,11 @@ with open(filename, 'r') as handle:
                         compsteps.append(name+'()')
             if 'example.com' in fxresults['hostname']: # TODO: find a better way to identify WAP sites than manually loading example.com when it hangs
                 compsteps=['noWapContentPlease']
+
+            all_data[location.hostname.rstrip('\r\n')] = compsteps
+            jsf = open(dirname+'..'+os.path.sep+'data.js', 'w')
+            jsf.write(json.dumps(all_data, indent=4))
+            jsf.close();
 
         if has_bug_data:
             if len(compsteps) > 0:
@@ -157,9 +226,24 @@ with open(filename, 'r') as handle:
                     'title':parts[1]
                 }
         # If we have two screenshots, join them
-        f = ("%03d-"%i)+location.hostname+'.png'
-        if os.path.exists(dirname+'wk-spoof'+f) and os.path.exists(dirname+f) and os.path.exists("c:\\Program Files (x86)\\IrfanView"):
-            subprocess.call(["c:\\Program Files (x86)\\IrfanView\\i_view32.exe", '/panorama=(1,%s%s,%swk-spoof%s)' % (dirname,f,dirname,f), '/convert %scomp\\%s' % (dirname,f)], bufsize=100)
+        f = ("%03d-"%i)+(location.hostname.rstrip('\r\n'))+'.png'
+        if os.path.exists(dirname+'wk-spoof-'+f) and os.path.exists(dirname+f) and os.path.exists("c:\\Program Files (x86)\\IrfanView"):
+            ss_a = open(dirname+f, 'rb')
+            ss_b = open(dirname+'wk-spoof-'+f, 'rb')
+            if diff_ratio(ss_a.read(), ss_b.read()) < 1.0:     
+                subprocess.call(["c:\\Program Files (x86)\\IrfanView\\i_view32.exe", '/panorama=(1,%s%s,%swk-spoof-%s)' % (dirname,f,dirname,f), '/convert %scomp\\%s' % (dirname,f)], bufsize=100)
+
+            tmp = tldextract.extract(url)
+            if run_until is None: # We only want to overwrite the index if we're not doing a "partial" run..
+            # 
+                if not tmp.subdomain in ['www', '']:
+                    tmp = '%s.%s.%s' % (tmp.subdomain, tmp.domain, tmp.suffix)
+                else:
+                    tmp = '%s.%s' % (tmp.domain, tmp.suffix)
+                file_index.append({'name':f,'hostname':tmp, 'fullurl':url})
+                jsf = open(dirname+'comp'+os.path.sep+'idx.js', 'w')
+                jsf.write(json.dumps(file_index, indent=4))
+                jsf.close();
 
         i+=1
         if has_bug_data:
