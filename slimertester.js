@@ -16,11 +16,14 @@ page.customHeaders = {
 };
 page.viewportSize = { width:360, height:640 };
 
-runSpecificBugTest = phantom.args[0]; // we can pass in a bug number on the command line to run that test only..
+var runSpecificsBugTest = null;
+if(phantom.args.length > 0){
+	console.log('Will run tests for bugs '+phantom.args)
+	runSpecificsBugTest = phantom.args; // we can pass in a bug number on the command line to run that test only..
+}
 
 var bugIdx=-1, currentTest=0, bug;
 var bugs = Object.keys(bugdata);
-if(runSpecificBugTest)bugIdx = bugs.indexOf(runSpecificBugTest)-1;
 var jobFallbackTimeout, xhrTestUrl;
 function jobTime(doJob, delay){
     delay = delay || 500;
@@ -60,10 +63,17 @@ page.onResourceReceived = function (res) {
 page.onLoadFinished = function (status, url, isFrame) {
 	//console.log('onLoadFinished '+status+' '+url+' '+isFrame);
 	
-	if(xhrTestUrl && page.content === '<html><head></head><body></body></html>'){
-		// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
-		registerTestResult(false, 'WAP content');
-		jobTime(nextBug, 10);
+	if(xhrTestUrl){
+		if(page.content === '<html><head></head><body></body></html>'){
+			// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
+			registerTestResult(false, 'WAP content');
+			jobTime(nextBug, 10);
+		}else{
+			registerTestResult(true, 'no WAP here, right?!');
+			// if next page is XHR, loading appears to fail *and* we'd see the source of the previous page.. Hence, load about:blank first
+			page.open('about:blank');
+			jobTime(nextBug, 10);
+		}
 	}else{
 		if(!isFrame)jobTime(runTestStep, 800);
 	}
@@ -74,16 +84,36 @@ page.onAlert = page.onPrompt = page.onConfirm = function () {return true;}
 jobTime(nextBug, 200);
 
 function nextBug () {
-	bugIdx++;
+	if(runSpecificsBugTest && runSpecificsBugTest.length > 0){
+		bugIdx = bugs.indexOf(runSpecificsBugTest.shift());
+	}else if(runSpecificsBugTest && runSpecificsBugTest.length === 0){ // we were testing a specified subset of bugs only, and we're done!
+		bugIdx = bugs.length+1; // not so subtle hack..
+	}else{
+		bugIdx++;
+	}
+//	console.log('bugIdx '+bugIdx)
+//	console.log(JSON.stringify(bugdata[bugs[bugIdx]]))
 	currentTest=0;
 	bug = bugs[bugIdx];
-	if(! bug in bugdata){
+	// tmp: run only xhr bugs
+	/*
+	while(bugdata[bug].testType != 'xhr'){
+		if (bugIdx<bugs.length-1) {
+			bugIdx++; bug = bugs[bugIdx];
+		}else{
+			phantom.quit()
+		}
+	}*/
+	// end tmp: run only xhr bugs
+	if(bugIdx >= bugs.length || ! bug in bugdata){
 		page.open('data:text/html,<html><body><form method="post" action="http://arewecompatibleyet.hallvord.com/data/testing/upload.php"><input type=submit><textarea style="visibility:hidden" name="csvdata">'+encodeURIComponent(csvStr)+'</textarea></form><pre>'+encodeURIComponent(csvStr));
 		console.log('Done. Results were written to '+outfile)
 	}else if (bugdata[bug]) {
 		ua = page.settings.userAgent = uadata[bugdata[bug].ua]['general.useragent.override'];
+		console.log('Will test '+bug)
 		if (bugdata[bug].testType === 'xhr') {
-			//console.log('xhr test..')
+			console.log('xhr test..');
+			page.open('about:blank');
 			xhrTestUrl = bugdata[bug].url;
 			loadSite();
 		}else{
@@ -94,7 +124,10 @@ function nextBug () {
 }
 
 function loadSite(){
-	jobTime(nextBug, 20000); // backup timeout in case we get stuck at some point..
+	jobTime(function(){
+		console.log('TIMEOUT! for '+bug);
+		nextBug();
+	}, 20000); // backup timeout in case we get stuck at some point..
 	page.open(bugdata[bug].url, function (status) {
 		if(status == 'success'){
 			if(!xhrTestUrl){
@@ -115,32 +148,33 @@ function runTestStep () {
 	jobTime(nextBug, 20000); // backup timeout in case we get stuck at some point..
 	if(xhrTestUrl)return; // handled elsewhere..
 	if (page.evaluateJavaScript('typeof hasViewportMeta === "function"')) {
-
 		if (bugdata[bug] && bugdata[bug].steps.length>currentTest) {
 			try{
 				page.evaluateJavaScript('var unsafeWindow=window;');
 				//console.log('('+bugdata[bug].steps[currentTest].toString()+')()')
-				result = page.evaluateJavaScript('('+bugdata[bug].steps[currentTest].toString()+')()');
+				result = page.evaluateJavaScript('try{('+bugdata[bug].steps[currentTest].toString()+')()}catch(e){"EXCEPTION: "+e}');
+				// Somewhat unexpectedly, evaluateJavaScript doesn't throw if the script throws..
+				//console.log('result now '+result)
+				if(/^EXCEPTION:/.test(result))throw result;
 				if(result == 'delay-and-retry' && retryCount<5){
 					jobTime(runTestStep, 1000);
 					console.log('scheduling new attempt, page is not ready.. '+retryCount+'/5');
 					retryCount++
 					return;
 				}
+				currentTest++;
+				retryCount=0;
+				if (bugdata[bug].steps[currentTest]) {
+					// can we get back to this?
+					// TODO: do something more clever than a timeout..
+					console.log('will wait for next test..');
+					return setTimeout(runTestStep, 500)
+				}
 			}catch(e){
-				result = 'EXCEPTION: '+e.message;
+				result = e;
 			}
-			currentTest++;
-			retryCount=0;
-			if (bugdata[bug].steps[currentTest]) {
-				// can we get back to this?
-				// TODO: do something more clever than a timeout..
-				console.log('will wait for next test..');
-				return setTimeout(runTestStep, 500)
-			}else{
-				registerTestResult(result);
-				jobTime(nextBug, 10);
-			}
+			registerTestResult(result);
+			jobTime(nextBug, 10);
 		};
 	}else{
 		console.log('needs to include test file')
@@ -164,10 +198,6 @@ function registerTestResult (result, comment) {
 
 function writeResultsToFile(){
 	// all done!?
-    if(runSpecificBugTest){
-    	console.log(results);
-    	phantom.exit();
-    }
     var csvStr = '';
 	if(results.length>0){
         for(var i=0; i<results.length; i++){
@@ -179,4 +209,8 @@ function writeResultsToFile(){
     var f = fs.open(outfile, 'w');
     f.write(csvStr);
     f.close();
+    if(runSpecificsBugTest && runSpecificsBugTest.length === 0){
+    	console.log(results);
+    	phantom.exit();
+    }
 }
