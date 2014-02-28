@@ -1,7 +1,7 @@
 from marionette import Marionette
 import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse
 
-dirname = 'C:\\mozilla\\testing\\missing-2014-02-18\\'
+dirname = 'C:\\mozilla\\testing\\ar\\'
 filename = dirname + 'sites.txt'
 start_at = 0
 run_until = None
@@ -227,23 +227,22 @@ with open(filename, 'r') as handle:
                 }
         # If we have two screenshots, join them
         f = ("%03d-"%i)+(location.hostname.rstrip('\r\n'))+'.png'
+        tmp = tldextract.extract(url)
         if os.path.exists(dirname+'wk-spoof-'+f) and os.path.exists(dirname+f) and os.path.exists("c:\\Program Files (x86)\\IrfanView"):
             ss_a = open(dirname+f, 'rb')
             ss_b = open(dirname+'wk-spoof-'+f, 'rb')
             if diff_ratio(ss_a.read(), ss_b.read()) < 1.0:     
                 subprocess.call(["c:\\Program Files (x86)\\IrfanView\\i_view32.exe", '/panorama=(1,%s%s,%swk-spoof-%s)' % (dirname,f,dirname,f), '/convert %scomp\\%s' % (dirname,f)], bufsize=100)
-
-            tmp = tldextract.extract(url)
-            if run_until is None: # We only want to overwrite the index if we're not doing a "partial" run..
-            # 
-                if not tmp.subdomain in ['www', '']:
-                    tmp = '%s.%s.%s' % (tmp.subdomain, tmp.domain, tmp.suffix)
-                else:
-                    tmp = '%s.%s' % (tmp.domain, tmp.suffix)
-                file_index.append({'name':f,'hostname':tmp, 'fullurl':url})
-                jsf = open(dirname+'comp'+os.path.sep+'idx.js', 'w')
-                jsf.write(json.dumps(file_index, indent=4))
-                jsf.close();
+                if run_until is None: # We only want to overwrite the index if we're not doing a "partial" run..
+                # 
+                    if not tmp.subdomain in ['www', '']:
+                        tmp = '%s.%s.%s' % (tmp.subdomain, tmp.domain, tmp.suffix)
+                    else:
+                        tmp = '%s.%s' % (tmp.domain, tmp.suffix)
+                    file_index.append({'name':f,'hostname':tmp, 'fullurl':url})
+                    jsf = open(dirname+'comp'+os.path.sep+'idx.js', 'w')
+                    jsf.write(json.dumps(file_index, indent=4))
+                    jsf.close();
 
         i+=1
         if has_bug_data:
