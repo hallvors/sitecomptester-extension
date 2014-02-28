@@ -10,6 +10,186 @@ var hosts = {};
 
 */
 var bugdata = {
+    '878630' : {
+        url:'http://ask.com',
+        ua:'FirefoxOS',
+        steps:[ function(){return mobileLinkOrScriptUrl('/mobile/')} ]
+    },
+    "959970": {
+        "url": "http://fnb.mobi", 
+        "steps": [
+            function(){},
+            function(){if(/REDIRECT/.test(location.pathname))return 'delay-and-retry'; return hasViewportMeta() && location.hostname == 'ww2.fnb.mobi';}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "fnb.mobi sends simplified site to Firefox OS"
+    },
+    "959735": {
+        "url": "http://www.wired.com/design/2014/01/super-detailed-photos-of-snowflakes-shot-with-hacked-camera/", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return getComputedStyle(document.querySelector('.entry p')).wordWrap != 'break-word'}
+        ], 
+        "title": "Wired.com is not word wrapping properly for Firefox Android"
+    },
+    "964612": {
+        "url": "http://www.slate.fr/", 
+        "steps": [
+            function(){return location.hostname =='m.slate.fr'}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "www.slate.fr has broken layout in Firefox OS"
+    },
+    "911601": {
+        "url": "http://www.reuters.com/finance/stocks/OPERA.OL/key-developments/article/2833426", 
+        "ua": "FirefoxAndroid", 
+        "steps": [ /* If this page completes loading, the problem is fixed. Lovely and simple pass condition :) */
+            function(){return true}
+        ], 
+        "title": "redirect loop on Reuters page"
+    },
+    "921536": {
+        "url": "http://www.google.com/", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return ! (document.getElementById('gbg').pathname == '/mobile/')}
+        ], 
+        "title": "Google menu icon in the top-left corner in Firefox doesn't open a menu"
+    },
+    "960895": {
+        "url": "http://zozo.jp", 
+        "steps": [
+            function(){return location.pathname.indexOf('/sp/')==0}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "zozo.jp sends desktop site to Firefox OS"
+    },
+    "942071": {
+        "url": "http://view.vzaar.com/1165951/player", 
+        "steps": [
+            function(){return document.getElementsByTagName('video')[0].className.indexOf('flash_error')==-1}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "vzaar.com says browser can't play HTML5 (MP4) video"
+    },
+    "973263": {
+        "url": "http://www.swisschalet.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.swisschalet.com";}
+        ], 
+        "title": "Swisschalet.com serves desktop site to Firefox OS"
+    },
+    "971235": {
+        "url": "http://www.pcmag.com", 
+        "steps": [
+            function(){return location.hostname == 'mobile.pcmag.com'}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Pcmag.com serves mobile site to iPhone, Chrome, Opera. Desktop site to Firefox mobile,"
+    },
+    "957960": {
+        "url": "http://m.hongshu.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return getComputedStyle(document.querySelector('nav ul li')).flex != '';}
+        ], 
+        "title": "m.hongshu.com navigation rendering broken due to -webkit- CSS for flexbox"
+    },
+    "931905": {
+        "url": "http://i.news.pathfinder.gr", 
+        "steps": [
+            function(){return document.getElementById('head-nav').style.display!='none'}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "i.pathfinder.gr doesn't render properly on Firefox for Android"
+    },
+    "957515": {
+        "url": "http://m.xxsy.net", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return getComputedStyle(document.querySelector('nav ul')).flex != '';}
+        ], 
+        "title": "m.xxsy.net - webkit styling breaks layout"
+    },
+    "972371": {
+        "url": "http://ba.no", 
+        "steps": [
+            function(){return location.hostname == 'mobil.ba.no'}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "ba.no sends desktop site to Firefox OS"
+    },
+    "966310": {
+        "url": "http://www.postmedia.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return location.pathname.indexOf('/mobile/')>-1 || location.pathname.indexOf('/touch/')>-1}
+        ], 
+        "title": "Postmedia sites not serving mobile content to Firefox"
+    },
+    "965124": {
+        "url": "http://www.finegardening.com/Videos/", 
+        "steps": [
+            function(){if(!document.getElementById('_containersinglePlayer100052'))return 'delay-and-retry'; return document.querySelector('img[src*="admin.brightcove.com/viewer/upgrade_flash_player"]') == null}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "finegardening.com videos do not play (brightcove)"
+    }, 
+    "941610": {
+        "url": "http://www.cinemax.com/video/", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){if(!document.getElementById('_containerplayer1'))return 'delay-and-retry'; return document.querySelector('img[src*="admin.brightcove.com/viewer/upgrade_flash_player"]') == null}
+        ], 
+        "title": "cinemax.com doesn't play video (uses Brightcove, shows flash error)"
+    }, 
+    "970852": {
+        "url": "http://readingrockets.org/shows/", 
+        "steps": [
+            function(){return document.querySelector('img[src*="admin.brightcove.com/viewer/upgrade_flash_player"]') == null}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "readingrockets.org doesn't play video in Firefox OS"
+    },
+    "963595": {
+        "url": "https://raw2.github.com/fnando/browser/master/lib/browser/methods/devices.rb", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.body.textContent.match(/\/Tablet/) != null}
+        ], 
+        "title": "browser gem doesn't recognize Firefox OS tablet ua as tablet"
+    }, 
+    "969861": {
+        "url": "http://www.mydealz.de", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.getElementById('fb-root')==null}
+        ], 
+        "title": "mydealz.de sends desktop site to Firefox OS"
+    },
+    "878255" : {
+        url: 'http://24sata.hr',
+         ua: "FirefoxOS",
+         /* there's a script on the mobile page that bumps us to the desktop page, needs time to run */
+        steps:[function(){}, function(){return location.hostname.indexOf("m.24sata.hr")>-1 && hasViewportMeta()}]
+    },
+    "973354": {
+        "url": "http://www.nhl.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "title": "NHL.com serves desktop content to Firefox OS"
+    }, 
+    "921532": {
+        "url": "http://images.google.com/search?q=Lira&tbm=isch#", 
+        "ua": "FirefoxAndroid", 
+        "steps": [
+            function(){return document.getElementById('mnav')===null}
+        ], 
+        "title": "Google images on Firefox Android doesn't load images as you scroll"
+    }, 
     "960851": {
         "url": "http://www.sponichi.co.jp", 
         "steps": [
@@ -78,15 +258,15 @@ var bugdata = {
             function(){document.getElementById('player1_jwplayer_display_icon').click();return document.getElementsByTagName('video').length>0}
         ], 
         "title": "m.rpp.com.pe can't play a video"
-    }, 
+    },
     "957958": {
-        "url": "http://idnes.cz", 
-        "ua": "FirefoxOS", 
+        "url": "http://idnes.cz",
+        "ua": "FirefoxOS",
         "steps": [
             function(){return location.hostname === 't.idnes.cz'}
-        ], 
+        ],
         "title": "idnes.cz offers simple content for Firefox OS"
-    }, 
+    },
     "966850": {
         "url": "http://screen.yahoo.com", 
         "ua": "FirefoxOS", 
@@ -270,13 +450,13 @@ var bugdata = {
         "title": "okwave.jp shows a banner for switching to mobile site to other mobile browsers, not to Firefox OS"
     }, 
     "775919": {
-        "url": "http://www.bbc.co.uk/iplayer/radio", 
-        "ua": "FirefoxOS", 
+        "url": "http://www.bbc.co.uk/iplayer",
+        "ua": "FirefoxOS",
         "steps": [
             function(){return !/Not Supported/i.test(document.title)}
-        ], 
+        ],
         "title": "BBC iPlayer does not detect the Firefox UA"
-    }, 
+    },
     "959468": {
         "url": "http://m.self.com.cn", 
         "ua": "FirefoxOS", 
@@ -652,10 +832,9 @@ var bugdata = {
     '907371' : {
         url:'http://s.huffpost.com/assets/css.php?f=mobileweb%2Fdev%2Fnormalize.css%2Cmobileweb%2Fdev%2Fapp.css%2Cbasic.css%2Cbuttons.css%2Cmobileweb%2Fnews%2Fauth.css&v=1380134457',
         ua:'FirefoxOS',
-        steps:[function(response){
-            return ! /@font-face\s*\{\s*font-family:\s*"hpmobileweb";\s*src:\s*url\("\/images\/mobileweb\/hpmobileweb\.eot"\);\s*src:\s*url\("\/images\/mobileweb\/hpmobileweb\.eot\?#iefix"\) format\("embedded-opentype"\),\s*url\("\/images\/mobileweb\/hpmobileweb\.svg#hpmobileweb"\) format\("svg"\);\s*font-weight:\s*normal;\s*font-style:\s*normal;\s*/.test(response.text)
+        steps:[function(){
+            return ! /@font-face\s*\{\s*font-family:\s*"hpmobileweb";\s*src:\s*url\("\/images\/mobileweb\/hpmobileweb\.eot"\);\s*src:\s*url\("\/images\/mobileweb\/hpmobileweb\.eot\?#iefix"\) format\("embedded-opentype"\),\s*url\("\/images\/mobileweb\/hpmobileweb\.svg#hpmobileweb"\) format\("svg"\);\s*font-weight:\s*normal;\s*font-style:\s*normal;\s*/.test(document.body.textContent)
         }],
-        testType:'xhr'
     },
     '766035' : {
         url:'http://m.zipscene.com/pjs-coffee/albums/album/738550521-simply-the-best',
@@ -884,11 +1063,6 @@ var bugdata = {
         ua:'FirefoxAndroid',
         steps:[function(){return location.hostname.indexOf('mobile.lufthansa.com')>-1}]
     },
-    '878630' : {
-        url:'http://ask.com',
-        ua:'FirefoxOS',
-        steps:[hasViewportMeta]
-    },
     '856662' : {
         url:'http://el-nacional.com',
         ua:'FirefoxOS',
@@ -976,14 +1150,14 @@ var bugdata = {
     '896951' : {
         url:'http://www.orkut.com',
         ua:'FirefoxOS',
-        /* Log in, then test (pardon the pw - it's a throwaway testing account) */
-        steps:[function(){document.getElementById('Email').value='mozwebcompat';document.getElementById('Passwd').value='PoliceTheInternet';document.getElementById('signIn').click();}, function(){return location.hostname.indexOf('m.orkut')>-1}]
+        /* Log in, then test */
+        steps:[function(){tryLogin('Passwd', 'signIn')}, function(){return location.hostname.indexOf('m.orkut')>-1}]
     },
     '827869' : {
         url:'http://mail.google.com',
         ua:'FirefoxOS',
         /* Log in, then test (pardon the pw - it's a throwaway testing account) */
-        steps:[function(){if(document.getElementById('Email')){document.getElementById('Email').value='mozwebcompat';document.getElementById('Passwd').value='PoliceTheInternet';document.getElementById('signIn').click();}else{return document.documentElement.className+document.body.className === ''}}, function(){return document.documentElement.className+document.body.className === ''}]
+        steps:[function(){tryLogin('Passwd', 'signIn')}, function(){return document.documentElement.className+document.body.className === ''}]
     },
     '826347' : {
         url:'http://www.msn.com',
@@ -2422,11 +2596,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta()}]
 	},
-	"878255" : {
-		url: 'http://24sata.hr',
-		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.24sata.hr")>-1 && hasViewportMeta()}]
-	},
     "876357" : {
 		url: 'http://m.economist.com',
 		 ua: "FirefoxOS",
@@ -3314,14 +3483,6 @@ var automated_tests={
         ], 
         "ua": "FirefoxOS", 
         "title": "es.playstation.com doesn't recognize B2G or Fennec UAs as mobile"
-    }, 
-    "959970": {
-        "url": "http://fnb.mobi", 
-        "steps": [
-            function(){return hasViewportMeta();}
-        ], 
-        "ua": "FirefoxOS", 
-        "title": "fnb.mobi sends simplified site to Firefox OS"
     }, 
     "959976": {
         "url": "http://junkmail.co.za", 
@@ -4398,13 +4559,13 @@ var automated_tests={
         "title": "adressa.no sends desktop site to Firefox OS"
     }, 
     "972374": {
-        "url": "http://ikea.com", 
+        "url": "http://ikea.com",
         "steps": [
             function(){return hasViewportMeta() && location.hostname === "m.ikea.com" && mobileLinkOrScriptUrl();}
-        ], 
-        "ua": "FirefoxOS", 
+        ],
+        "ua": "FirefoxOS",
         "title": "ikea.com sends desktop site to Firefox OS"
-    }, 
+    },
     "972384": {
         "url": "http://abcnyheter.no", 
         "steps": [
@@ -4501,3 +4662,17 @@ function cssCheck(classNameList, propertiesThatMustExist){
     }
     return false;
 }
+// This is a helper method that will attempt to submit a login form if the password manager has filled in a password
+// pass the ID of the password field and the ID of the button/element to click() in order to log in
+function tryLogin(passwdId, loginBtnId){
+    if(document.getElementById(passwdId)){
+        if(document.getElementById(passwdId).value!=''){ // Yay, we have a stored password - it's autocompleted..
+            document.getElementById(loginBtnId).click();
+        }else{
+            throw 'Can\'t test, no stored password';
+        }
+    }else{
+        console.log('password element not found, have session already?')
+        return 'password element not found, have session already?' /* Not sure if we'll make use of this anywhere */
+    }
+}    
