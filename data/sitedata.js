@@ -10,6 +10,20 @@ var hosts = {};
 
 */
 var bugdata = {
+    "972374": {
+        "url": "http://ikea.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.ikea.com" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS1.4", 
+        "title": "ikea.com sends desktop site to Firefox OS"
+    }, 
+    '974797' : {
+        url:'http://shine.com',
+        ua:'FirefoxOS1.4',
+        steps:[function(){return location.hostname=='m.shine.com'}],
+        "title":"shine.com sends desktop site to Firefox OS"
+    },
     '878630' : {
         url:'http://ask.com',
         ua:'FirefoxOS',
@@ -21,7 +35,7 @@ var bugdata = {
             function(){},
             function(){if(/REDIRECT/.test(location.pathname))return 'delay-and-retry'; return hasViewportMeta() && location.hostname == 'ww2.fnb.mobi';}
         ], 
-        "ua": "FirefoxOS", 
+        "ua": "FirefoxOS1.4", 
         "title": "fnb.mobi sends simplified site to Firefox OS"
     },
     "959735": {
@@ -4558,14 +4572,6 @@ var automated_tests={
         "ua": "FirefoxOS", 
         "title": "adressa.no sends desktop site to Firefox OS"
     }, 
-    "972374": {
-        "url": "http://ikea.com",
-        "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.ikea.com" && mobileLinkOrScriptUrl();}
-        ],
-        "ua": "FirefoxOS",
-        "title": "ikea.com sends desktop site to Firefox OS"
-    },
     "972384": {
         "url": "http://abcnyheter.no", 
         "steps": [
