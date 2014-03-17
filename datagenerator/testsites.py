@@ -1,7 +1,7 @@
 from marionette import Marionette
 import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse
 
-dirname = 'C:\\mozilla\\testing\\ar\\'
+dirname = 'C:\\mozilla\\testing\\missing-2014-03-17\\'
 filename = dirname + 'sites.txt'
 start_at = 0
 run_until = None
@@ -110,14 +110,16 @@ def load_and_check(url, type=''):
     location = urlparse.urlparse(url)
     try:
         m.delete_all_cookies()
-        m.delete_session()
-        m.start_session()
+        #m.delete_session()
+        #m.start_session()
         m.navigate(url)
     except:
         try:
             print 'Failed loading '+url+', trying again with www.'
-            m.navigate(re.sub('://', '://www.', url))
+            m.delete_session()
+            m.start_session()
             url = re.sub('://', '://www.', url)
+            m.navigate(url)
         except:
             print 'Error loading '+url
             return
@@ -172,33 +174,49 @@ with open(filename, 'r') as handle:
             url = 'http://%s' % url
         url = url.strip().rstrip('\r\n')
         location = urlparse.urlparse(url)
+        hostname = location.hostname.rstrip('\r\n')
         print str(i) + ' : ' + url
-        empty_firefox_cache(m)
-        spoof_firefox_os()
-        fxresults = load_and_check(url)
-        #print 'firefox spoof results: '+fxresults
-        empty_firefox_cache(m)
-        spoof_safari_ios()
-        wkresults = load_and_check(url, 'wk-spoof-')
-        #print 'AppleWebKit spof results', wkresults
-        compsteps = []
-        if fxresults is not None and wkresults is not None:
-            fxresults = json.loads(fxresults)
-            wkresults = json.loads(wkresults)
-            for name in fxresults:
-                print name, wkresults[name] , fxresults[name]
-                if not wkresults[name] == fxresults[name]:
-                    if name == 'hostname':
-                        compsteps.append('location.hostname === "'+wkresults["hostname"]+'"')
-                    else:
-                        compsteps.append(name+'()')
-            if 'example.com' in fxresults['hostname']: # TODO: find a better way to identify WAP sites than manually loading example.com when it hangs
-                compsteps=['noWapContentPlease']
+        if has_bug_data and hostname in all_data and len(all_data[hostname]) > 0: # we have some test data stored from earlier, we might use them..
+            compsteps = all_data[hostname]
+        else:
+            try:
+                empty_firefox_cache(m)
+                spoof_firefox_os()
+                fxresults = load_and_check(url)
+                #print 'firefox spoof results: '+fxresults
+                empty_firefox_cache(m)
+                spoof_safari_ios()
+                wkresults = load_and_check(url, 'wk-spoof-')
+                #print 'AppleWebKit spof results', wkresults
+            except:
+                try:
+                    m.delete_session()
+                except:
+                    pass
+                try:
+                    m.start_session()
+                except:
+                    pass
+                i+=1
+                continue
+            compsteps = []
+            if fxresults is not None and wkresults is not None:
+                fxresults = json.loads(fxresults)
+                wkresults = json.loads(wkresults)
+                for name in fxresults:
+                    print name, wkresults[name] , fxresults[name]
+                    if not wkresults[name] == fxresults[name]:
+                        if name == 'hostname':
+                            compsteps.append('location.hostname === "'+wkresults["hostname"]+'"')
+                        else:
+                            compsteps.append(name+'()')
+                if 'example.com' in fxresults['hostname']: # TODO: find a better way to identify WAP sites than manually loading example.com when it hangs
+                    compsteps=['noWapContentPlease']
 
-            all_data[location.hostname.rstrip('\r\n')] = compsteps
-            jsf = open(dirname+'..'+os.path.sep+'data.js', 'w')
-            jsf.write(json.dumps(all_data, indent=4))
-            jsf.close();
+                all_data[location.hostname.rstrip('\r\n')] = compsteps
+                jsf = open(dirname+'..'+os.path.sep+'data.js', 'w')
+                jsf.write(json.dumps(all_data, indent=4))
+                jsf.close();
 
         if has_bug_data:
             if len(compsteps) > 0:
