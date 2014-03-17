@@ -10,6 +10,31 @@ var hosts = {};
 
 */
 var bugdata = {
+    "826338" : {
+        url: 'http://yahoo.com/',
+         ua: "FirefoxOS",
+        steps:[function(){return location.hostname.indexOf('m.yahoo')>-1}]
+    },
+    "920342": {
+        "url": "http://newyork.schmap.com/", 
+        "steps": [
+            function(){return document.getElementById('rotationalert').style.display === 'none';}
+        ], 
+        "ua": "FirefoxAndroid", 
+        "title": "Schmap blocks Firefox for Android users from using site"
+    },
+    '969832' : {
+        url:'http://bild.de',
+        ua:'FirefoxOS',
+        steps:[function(){}, function(){return hostname === 'wap.bild.de';}],
+        title:'bild.de sends desktop version to FxOS'
+    },
+    '969845' : {
+        url:'http://rtl.de',
+        ua:'FirefoxOS',
+        steps:[function(){}, function(){return hostname === 'mobil.rtl.de';}],
+        title:''
+    },
     "972374": {
         "url": "http://ikea.com", 
         "steps": [
@@ -269,7 +294,16 @@ var bugdata = {
         "ua": "FirefoxOS", 
         "steps": [
             function(){document.querySelector('*[class*="icon_video"]').parentElement.click(); },
-            function(){document.getElementById('player1_jwplayer_display_icon').click();return document.getElementsByTagName('video').length>0}
+            function(){
+                if(document.getElementsByTagName('object').length){
+                    if(/player\.swf/.test(document.getElementsByTagName('object')[0].data))return false;
+                }
+                if(!document.getElementById('player1_jwplayer_display_icon')){
+                    return 'delay-and-retry';
+                }
+                document.getElementById('player1_jwplayer_display_icon').click();
+                return document.getElementsByTagName('video').length>0
+            }
         ], 
         "title": "m.rpp.com.pe can't play a video"
     },
@@ -830,7 +864,7 @@ var bugdata = {
         url:'http://techcrunch.com',
         ua:'FirefoxOS',
         /* Re-load loop.. We never get to render the <nav id="navigation"> due to the redirects */
-        steps:[function(){ return document.getElementById('navigation')!=null; }]
+        steps:[function(){ return document.getElementsByClassName('nav-bar').length != 0; }]
     },
     '804994' : {
         url:'http://twitch.tv',
@@ -1310,11 +1344,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
-	"827622" : {
-		url: 'http://bing.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta()}]
-	},
 	"878258" : {
 		url: 'http://blackhatteam.com',
 		 ua: "FirefoxOS",
@@ -1760,11 +1789,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.atrapalo.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"827622" : {
-		url: 'http://m.bing.com/maps',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta()}]
-	},
 	"888209" : {
 		url: 'http://m.bumeran.com.co',
 		 ua: "FirefoxOS",
@@ -1958,7 +1982,7 @@ var automated_tests={
 	"891873" : {
 		url: 'http://news.google.es',
 		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return hasViewportMeta()}]
 	},
 	"" : {
 		url: 'http://nfl.com',
@@ -2260,11 +2284,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}]
 	},
-	"827622" : {
-		url: 'http://www.bing.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta()}]
-	},
 	"899541" : {
 		url: 'http://www.blackberry.com/',
 		 ua: "FirefoxOS",
@@ -2365,11 +2384,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.orange.es")>-1 && hasHandheldFriendlyMeta() && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"859456" : {
-		url: 'http://www.pinterest.com/',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
 	"808572" : {
 		url: 'http://www.pressly.com',
 		 ua: "FirefoxOS",
@@ -2395,11 +2409,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.vesti-online.com")>-1 && hasViewportMeta()}]
 	},
-	"826338" : {
-		url: 'http://www.yahoo.com/?m=sp',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta()}]
-	},
 	"843116" : {
 		url: 'http://wwwhatsnew.com',
 		 ua: "FirefoxOS",
@@ -2414,16 +2423,6 @@ var automated_tests={
 		url: 'http://wyborcza.pl',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.wyborcza.pl")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
-	"826338" : {
-		url: 'http://yahoo.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta()}]
-	},
-	"826338" : {
-		url: 'http://yahoo.com/',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta()}]
 	},
 	"878286" : {
 		url: 'http://yandex.ru',
@@ -2951,17 +2950,9 @@ var automated_tests={
         "steps": [
             function(){return mobileLinkOrScriptUrl();}
         ], 
-        "ua": "FirefoxOS", 
-        "title": "tieba.baidu.com serves simplified mobile content to Firefox Android"
-    }, 
-    "920342": {
-        "url": "http://newyork.schmap.com/", 
-        "steps": [
-            function(){return hasViewportMeta();}
-        ], 
         "ua": "FirefoxAndroid", 
-        "title": "Schmap blocks Firefox for Android users from using site"
-    }, 
+        "title": "tieba.baidu.com serves simplified mobile content to Firefox Android"
+    },
     "959475": {
         "url": "http://yicha.cn", 
         "steps": [
@@ -4587,6 +4578,422 @@ var automated_tests={
         ], 
         "ua": "FirefoxOS", 
         "title": "norsk-tipping.no sends desktop site to Firefox OS"
+    },
+    "981388": {
+        "url": "http://77news.al", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "77news.al has broken layout in Firefox OS"
+    }, 
+    "981385": {
+        "url": "http://dielli.al", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "dielli.al has broken layout in Firefox OS"
+    }, 
+    "981384": {
+        "url": "http://albeu.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.albeu.com" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "albeu.com has broken layout in Firefox OS"
+    }, 
+    "981387": {
+        "url": "http://living.al", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "www.living.al" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "living.al has broken layout in Firefox OS"
+    }, 
+    "981381": {
+        "url": "http://ikub.al", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "mobile.ikub.al" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "ikub.al has broken layout in Firefox OS"
+    }, 
+    "981380": {
+        "url": "http://top-channel.tv", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "top-channel.tv has broken layout in Firefox OS"
+    }, 
+    "975329": {
+        "url": "http://glasistre.hr", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.glasistre.hr" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "glasistre.hr sends desktop site to Firefox OS"
+    }, 
+    "979062": {
+        "url": "http://bancoestado.cl", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "bancoestado.cl sends desktop site to Firefox OS"
+    }, 
+    "932846": {
+        "url": "http://rediff.com/", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.rediff.com" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "rediff.com isn't redirecting to mobile site on Firefox OS"
+    }, 
+    "974529": {
+        "url": "http://www.bestbuy.ca", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.bestbuy.ca" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Bestbuy.ca and Futureshop.ca send Firefox OS to desktop site instead of mobile."
+    }, 
+    "978818": {
+        "url": "http://taringa.net", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.taringa.net";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "taringa.net sends simplified site to Firefox OS"
+    }, 
+    "978817": {
+        "url": "http://ole.com.ar", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "ios.ole.com.ar";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "ole.com.ar sends desktop site to Firefox OS"
+    }, 
+    "979704": {
+        "url": "http://www.roomie.jp/", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "www.roomie.jp sends the desktop version to Firefox OS"
+    }, 
+    "978090": {
+        "url": "http://bancochile.cl", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "www.bancamovil.bancochile.cl";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "bancochile.cl sends desktop site to Firefox OS"
+    }, 
+    "981829": {
+        "url": "http://www.chicagotribune.com/", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "my.chicagotribune.com" && hasMobileOptimizedMeta() && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Chicago Tribune - redirection loop with Firefox for Android UA"
+    }, 
+    "974800": {
+        "url": "http://junglee.com", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "junglee.com sends desktop site to Firefox OS"
+    }, 
+    "978824": {
+        "url": "http://despegar.com.ar", 
+        "steps": [
+            function(){return location.hostname === "m.despegar.com.ar" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "despegar.com.ar sends desktop site to Firefox OS"
+    }, 
+    "978822": {
+        "url": "http://alamaula.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.alamaula.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "alamaula.com sends desktop site to Firefox OS"
+    }, 
+    "978829": {
+        "url": "http://babylon.com", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "babylon.com sends desktop site to Firefox OS"
+    }, 
+    "973811": {
+        "url": "http://www.bhg.com", 
+        "steps": [
+            function(){return hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "bhg.com sends desktop content to Firefox OS"
+    }, 
+    "974792": {
+        "url": "http://way2sms.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m1.way2sms.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "way2sms.com sends desktop site to Firefox OS"
+    }, 
+    "974793": {
+        "url": "http://myntra.com", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "myntra.com sends desktop site to Firefox OS"
+    }, 
+    "974791": {
+        "url": "http://moneycontrol.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.moneycontrol.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "moneycontrol.com sends desktop site to Firefox OS"
+    }, 
+    "974795": {
+        "url": "http://hindustantimes.com", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "hindustantimes.com sends desktop site to Firefox OS"
+    }, 
+    "979797": {
+        "url": "http://www.cinesunidos.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "pda.cinesunidos.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "cinesunidos.com sends desktop site to Firefox OS"
+    }, 
+    "946280": {
+        "url": "http://www.gammonsdaily.com/peter-gammons-the-new-generation-of-shortstops/", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "www.gammonsdaily.com - text cut off on Gammon's daily"
+    }, 
+    "978832": {
+        "url": "http://minutouno.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.minutouno.com" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "minutouno.com sends desktop site to Firefox OS"
+    }, 
+    "978830": {
+        "url": "http://mundogaturro.com", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "mundogaturro.com sends desktop site to Firefox OS"
+    }, 
+    "978834": {
+        "url": "http://mega.co.nz", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "mega.co.nz sends simplified site to Firefox OS"
+    }, 
+    "978839": {
+        "url": "http://groupon.com.ar", 
+        "steps": [
+            function(){return location.hostname === "m.groupon.com.ar";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "groupon.com.ar sends desktop site to Firefox OS"
+    }, 
+    "973806": {
+        "url": "http://video.disney.co.jp", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "video.disney.co.jp sends desktop content, shows flash error instead of video"
+    }, 
+    "974789": {
+        "url": "http://indiatimes.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.indiatimes.com" && mobileLinkOrScriptUrl() && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "indiatimes.com sends desktop site to Firefox OS"
+    }, 
+    "980326": {
+        "url": "http://banrisul.com.br", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "ww7.banrisul.com.br";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "banrisul.com.br sends desktop site to Firefox OS"
+    }, 
+    "978845": {
+        "url": "http://ehowenespanol.com", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "ehowenespanol.com sends desktop site to Firefox OS"
+    }, 
+    "979315": {
+        "url": "http://www.rpp.com.pe", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.rpp.com.pe";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "rpp.com.pe sends desktop site"
+    }, 
+    "978841": {
+        "url": "http://forobeta.com", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "forobeta.com sends desktop site to Firefox OS"
+    }, 
+    "974173": {
+        "url": "http://m.nissanusa.com", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "m.nissanusa.com gives error 500/404 to Firefox Android and Firefox OS"
+    }, 
+    "974170": {
+        "url": "http://www.nissanusa.com", 
+        "steps": [
+            function(){return hasVideoTags() && location.hostname === "m.nissanusa.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "nissanusa.com & nissan.ca send desktop site to Firefox OS"
+    }, 
+    "982021": {
+        "url": "http://balkanweb.com", 
+        "steps": [
+            function(){return location.hostname === "balkanweb.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "balkanweb.com has broken layout in Firefox OS"
+    }, 
+    "979321": {
+        "url": "http://peru21.pe", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.peru21.pe";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "peru21.pe sends desktop site to Firefox OS"
+    }, 
+    "975922": {
+        "url": "http://kjendis.no", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.kjendis.no";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "kjendis.no sends desktop site to Firefox OS"
+    }, 
+    "980572": {
+        "url": "http://www.wsj.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname.indexOf('m.')>-1 && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "wsj.com returns desktop not mobile site to Firefox Android and Firefox OS"
+    }, 
+    "979348": {
+        "url": "http://www.falabella.com.pe", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.falabella.com.pe";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "falabella.com.pe sends desktop site to Firefox OS"
+    }, 
+    "974796": {
+        "url": "http://sify.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.sify.com" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "sify.com sends desktop site to Firefox OS"
+    }, 
+    "979116": {
+        "url": "http://yapo.cl", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.yapo.cl" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "yapo.cl sends desktop site to Firefox OS"
+    }, 
+    "979113": {
+        "url": "http://www.emol.com", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "emol.com sends desktop site to Firefox OS"
+    }, 
+    "979336": {
+        "url": "http://www.tuteve.tv", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.tuteve.tv" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "tuteve.tv sends desktop site to Firefox OS"
+    }, 
+    "979358": {
+        "url": "http://libero.pe", 
+        "steps": [
+            function(){return location.hostname === "m.libero.pe";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "libero.pe sends desktop site to Firefox OS"
+    }, 
+    "979693": {
+        "url": "http://repubblica.it", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "repubblica.it renders low-quality images on Firefox OS"
+    }, 
+    "976206": {
+        "url": "http://www.xbox.com", 
+        "steps": [
+            function(){return hasViewportMeta() && hasVideoTags() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "xbox.com serves desktop content to Firefox mobile"
+    }, 
+    "978820": {
+        "url": "http://tn.com.ar", 
+        "steps": [
+            function(){return location.hostname === "m.tn.com.ar" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "tn.com.ar sends desktop site to Firefox OS"
+    }, 
+    "983727": {
+        "url": "http://forbes.com", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "forbes.com sends desktop site to Firefox OS"
     }
 
 }
