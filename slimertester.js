@@ -156,11 +156,16 @@ function runTestStep () {
 				// Somewhat unexpectedly, evaluateJavaScript doesn't throw if the script throws..
 				//console.log('result now '+result)
 				if(/^EXCEPTION:/.test(result))throw result;
-				if(result == 'delay-and-retry' && retryCount<5){
-					jobTime(runTestStep, 1000);
-					console.log('scheduling new attempt, page is not ready.. '+retryCount+'/5');
-					retryCount++
-					return;
+				if(result == 'delay-and-retry'){
+					if(retryCount<5){
+						jobTime(runTestStep, 1500);
+						console.log('scheduling new attempt, page is not ready.. '+retryCount+'/5');
+						retryCount++
+						return;
+					}else{
+						registerTestResult('TIMEOUT - page ready test failed after 5 attempts');
+						return;
+					}
 				}
 				currentTest++;
 				retryCount=0;
