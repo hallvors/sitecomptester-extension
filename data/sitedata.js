@@ -10,6 +10,104 @@ var hosts = {};
 
 */
 var bugdata = {
+    "973463": {
+        "url": "http://m.fisher-price.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.getElementById('mycarousel').parentNode.className.indexOf('right')===-1}
+        ], 
+        "title": "m.fisher-price.com has messy layout in Firefox for Android and Firefox OS"
+    }, 
+    "978843": {
+        "url": "http://telam.com.ar", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return location.pathname.indexOf('/movil/') === 0 }
+        ], 
+        "title": "telam.com.ar sends desktop site to Firefox OS"
+    }, 
+    "957596": {
+        "url": "http://m.xiangha.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return getComputedStyle( document.querySelector('header nav ul') ).display === 'flex'}
+        ], 
+        "title": "m.xiangha.com - broken rendering of navigation menu"
+    }, 
+    "976956": {
+        "url": "http://m.juegos.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.images.length > 1}
+        ], 
+        "title": "m.juegos.com fails to load in Firefox on Android because JavaScript assumes Android version number is in UA string"
+    }, 
+    "957956": {
+        "url": "http://book.easou.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.scripts.length > 1}
+        ], 
+        "title": "book.easou.com sends simplified mobile page to Firefox OS and Firefox on Android"
+    }, 
+    "962130": {
+        "url": "https://github.com/g13n/ua.js/blob/master/src/ua.js#L90-L100", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.body.textContent.indexOf('isTablet: detect(/(ipad|android(?!.*mobile)|tablet)/i)') == -1}
+        ], 
+        "title": "ua.js fails to recognize FxOS Tablet UA as tablet device"
+    }, 
+    "922000": {
+        "url": "http://m.r7.com/universalizationLayer/m/t/videos", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){for(var i=0; i<document.links.length; i++){if(document.links[i].style.display === 'block'){document.links[i].click();return null;}}},
+            function(){return document.body.textContent.indexOf('Desculpe nos')===-1}
+        ], 
+        "title": "m.r7.com can\u2019t play a video"
+    },  
+    "977376": {
+        "url": "http://android.clarin.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.images.length>=10;}
+        ], 
+        "title": "clarin.com mobile site never loads in Firefox OS web browser"
+    }, 
+    "956391": {
+        "url": "http://rideonrealtime.com/RealTime.aspx", 
+        "ua": "FirefoxAndroid", 
+        "steps": [
+            function(){return typeof __doPostBack === 'function' }
+        ], 
+        "title": "VTA real time transit map does not work in Firefox for Android"
+    }, 
+    "974802": {
+        "url": "http://indiarailinfo.com", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return location.hostname === 'm.indiarailinfo.com'}
+        ], 
+        "title": "indiarailinfo.com sends desktop site to Firefox OS"
+    },
+    "945960": {
+        "url": "http://tieba.baidu.com/", 
+        "steps": [
+            function(){return hasVideoTags();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "tieba.baidu.com serves desktop content to Firefox OS"
+    }, 
+    "959481": {
+        "url": "http://m.tieyou.com", 
+        "steps": [
+            function(){},/* js sniffing needs some time to run - a dummy function for the first load */
+            function(){return hasViewportMeta() && location.hostname === "m.tieyou.com" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "m.tieyou.com sends desktop site to Firefox OS"
+    }, 
     "826338" : {
         url: 'http://yahoo.com/',
          ua: "FirefoxOS",
@@ -26,13 +124,13 @@ var bugdata = {
     '969832' : {
         url:'http://bild.de',
         ua:'FirefoxOS',
-        steps:[function(){}, function(){return hostname === 'wap.bild.de';}],
+        steps:[function(){}, function(){return location.hostname === 'wap.bild.de';}],
         title:'bild.de sends desktop version to FxOS'
     },
     '969845' : {
         url:'http://rtl.de',
         ua:'FirefoxOS',
-        steps:[function(){}, function(){return hostname === 'mobil.rtl.de';}],
+        steps:[function(){}, function(){return location.hostname === 'mobil.rtl.de';}],
         title:''
     },
     "972374": {
@@ -1023,7 +1121,11 @@ var bugdata = {
 		url: 'https://api-3t.sandbox.paypal.com/nvp?METHOD=SetExpressCheckout&VERSION=93&USER=sdk-three_api1.sdk.com&PWD=QFZCWN5HZM8VBG7Q&SIGNATURE=A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU&PAYMENTREQUEST_0_AMT=5.00&PAYMENTREQUEST_0_CURRENCYCODE=USD&PAYMENTREQUEST_0_PAYMENTACTION=Sale&RETURNURL=http://www.example.org&CANCELURL=http://www.example.org',
 		 ua: "FirefoxOS",
          /* Try to use the token to redirect to mobile express payment screen - if it redirects to express-payment, it's a fail */
-		steps:[function(){ var token = decodeURIComponent(document.body.textContent.match(/TOKEN=([^&]*)/)[1]); alert(location.href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout-mobile&token="+token); }, function(){ if(location.hostname.indexOf('www.sandbox')==-1)return 'delay-and-retry'; return location.href.indexOf('cmd=_express-checkout-mobile')>-1 }]
+		steps:[function(){ 
+            if(!document.body)return 'delay-and-retry';
+            var token = decodeURIComponent(document.body.textContent.match(/TOKEN=([^&]*)/)[1]); 
+            location.href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout-mobile&token="+token; 
+        }, function(){ if(location.hostname.indexOf('www.sandbox')==-1)return 'delay-and-retry'; return location.href.indexOf('cmd=_express-checkout-mobile')>-1 }]
 	},
     "843153" : {
 		url: 'http://games.com',
@@ -1432,7 +1534,7 @@ var automated_tests={
 	"784450" : {
 		url: 'http://cnet.com',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.cnet.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return location.hostname.indexOf("cnet.com")>-1 && document.cookie.indexOf('fly_device=mobile')>-1;}]
 	},
 	"843132" : {
 		url: 'http://comunio.es',
@@ -1473,11 +1575,6 @@ var automated_tests={
 		url: 'http://directv.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
-	},
-	"784450" : {
-		url: 'http://download.cnet.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.cnet.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
 	"827676" : {
 		url: 'http://dropbox.com',
@@ -1798,11 +1895,6 @@ var automated_tests={
 		url: 'http://m.cinecolombia.com/movil/',
 		 ua: "FirefoxOS",
 		steps:[function(){return hasHandheldFriendlyMeta() /*(regression test, expected to pass)*/ && hasMobileOptimizedMeta() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
-	"784450" : {
-		url: 'http://m.cnet.com/news/android-key-lime-pie-most-wanted-features-video/57582545',
-		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.cnet.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
 	"876870" : {
 		url: 'http://m.danner.com/',
@@ -2298,11 +2390,6 @@ var automated_tests={
 		url: 'http://www.cheaptickets.com/',
 		 ua: "FirefoxOS",
 		steps:[function(){return hasHandheldFriendlyMeta() && hasViewportMeta()}]
-	},
-	"784450" : {
-		url: 'http://www.cnet.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.cnet.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
 	"843132" : {
 		url: 'http://www.comunio.es/',
@@ -3254,15 +3341,6 @@ var automated_tests={
         "testType": "xhr", 
         "title": "kong.net sends WAP page"
     }, 
-    "959481": {
-        "url": "http://m.tieyou.com", 
-        "steps": [
-            function(){},/* js sniffing needs some time to run - a dummy function for the first load */
-            function(){return hasViewportMeta() && location.hostname === "m.tieyou.com" && mobileLinkOrScriptUrl();}
-        ], 
-        "ua": "FirefoxOS", 
-        "title": "m.tieyou.com sends desktop site to Firefox OS"
-    }, 
     "957465": {
         "url": "http://wap.51.com", 
         "steps": [
@@ -3632,14 +3710,6 @@ var automated_tests={
         ], 
         "ua": "FirefoxOS", 
         "title": "contra.gr doesn't redirect to mobile site on Firefox OS"
-    }, 
-    "945960": {
-        "url": "http://tieba.baidu.com/", 
-        "steps": [
-            function(){return mobileLinkOrScriptUrl();}
-        ], 
-        "ua": "FirefoxOS", 
-        "title": "tieba.baidu.com serves desktop content to Firefox OS"
     }, 
     "931833": {
         "url": "http://www.capital.gr", 
