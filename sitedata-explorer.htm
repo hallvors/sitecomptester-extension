@@ -51,9 +51,36 @@ function filterme(str){
 		}
 	});
 }
+function listMissingResults(str){
+	var pre=document.getElementsByTagName('pre')[1];pre.innerHTML = 'Missing from results table:\n\n';
+	var bugids = Object.keys(bugdata);
+	for(var i=0; i < bugids.length; i++){
+		if(isNaN(bugids[i]))continue;
+		if(str.indexOf(bugids[i]) === -1){
+			pre.appendChild(document.createTextNode(bugids[i]+' ' /*+bugdata[bugids[i]].title+'\n' */ ));
+		}
+	}
+	pre.appendChild(document.createElement('hr'));
+	pre.appendChild(document.createTextNode('Failed loading / timeout:\n'));
+	var pre2 = document.body.appendChild(document.createElement('pre'));
+	var lines = str.split(/\r?\n/g);
+	lines.forEach(function(line){
+		var details = line.split(/\t/);
+		if(details[3].indexOf('TIMEOUT') === 0 || details[5] !== undefined && details[5].indexOf('failed to load')>-1 ){
+			pre.appendChild(document.createTextNode(details[0]+' ' /*+bugdata[bugids[i]].title+'\n' */ ));
+			pre2.appendChild(document.createTextNode(line+'\n'))
+		}
+	});
+
+}
 </script>
 <p>Search by bug or hostname: <input type="text" onkeyup="search(this.value)" onchange="search(this.value)" list="allbugs"></p>
 <dl id="buglist"></dl>
+<p>Paste tab-separated bug data (first field bug number) here to filter out those bugs that have tests already:</p>
 <textarea onchange="filterme(this.value)"></textarea>
 <pre></pre>
+<p>..or paste bug result data here to get a list of tests that didn't run:</p>
+<textarea onchange="listMissingResults(this.value)"></textarea>
+<pre></pre>
+
 </body></html>
