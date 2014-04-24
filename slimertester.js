@@ -5,16 +5,7 @@ var date = new Date();
 var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
 var results=[];
 var uadata = require('data/uadata.json');
-
-var page = require('webpage').create();
-var ua = page.settings.userAgent = "Mozilla/5.0 (Mobile; rv:26.0) Gecko/26.0 Firefox/26.0";
-page.customHeaders = {
-"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-"Accept-Language": "en-us,en;q=0.5",
-"Accept-Encoding": "gzip, deflate",
-"Connection": "keep-alive"
-};
-page.viewportSize = { width:360, height:640 };
+var page = createPage();
 
 var runSpecificsBugTest = null;
 if(phantom.args.length > 0){
@@ -26,66 +17,22 @@ var bugIdx=-1, currentTest=0, bug;
 var bugs = Object.keys(bugdata);
 var jobFallbackTimeout, xhrTestUrl;
 function jobTime(doJob, delay){
+	//console.log('scheduling ' + doJob.name + ' in ' + delay + 'ms')
     delay = delay || 500;
     clearTimeout(jobFallbackTimeout);
     jobFallbackTimeout = setTimeout(doJob, delay);
 }
 
-page.onResourceRequested = function (req) {
-	//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header.. 
-    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})');
-    if(bug && bugdata[bug] && bugdata[bug].injectScript){
-    	//console.log('injecting: '+bugdata[bug].injectScript)
-    	page.evaluateJavaScript(bugdata[bug].injectScript);
-    }
-};
-
-page.onResourceError = function (res) {
-	//var desc = 'received: '+res.url+'\n '+res.contentType;
-    //console.log('received: ' + desc);
-}
-page.onResourceReceived = function (res) {
-    //console.log(JSON.stringify(res, null, 4))
-	if(/application\/vnd\.wap(\.xhtml\+xml|\.wml|)/i.test(res.contentType)){
-		console.log('WAP! FAILURE!')
-		registerTestResult(false, 'WAP content');
-		page.stop()
-		jobTime(nextBug, 5);
-	}else if(xhrTestUrl && res.url === xhrTestUrl){
-		var obj = {text: res.body, headers:{}}
-		for(var i in res.headers)obj.headers[res.headers[i].name] = res.headers[i].value;
-		var result = bugdata[bug].steps[0](obj);
-		registerTestResult(result);
-		jobTime(nextBug, 10);
-	}
-};
-
-page.onLoadFinished = function (status, url, isFrame) {
-	//console.log('onLoadFinished '+status+' '+url+' '+isFrame);
-	
-	if(xhrTestUrl){
-		if(page.content === '<html><head></head><body></body></html>'){
-			// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
-			registerTestResult(false, 'WAP content');
-			jobTime(nextBug, 10);
-		}else{
-			registerTestResult(true, 'no WAP here, right?!');
-			// if next page is XHR, loading appears to fail *and* we'd see the source of the previous page.. Hence, load about:blank first
-			page.open('about:blank');
-			jobTime(nextBug, 10);
-		}
-	}else{
-		if(!isFrame)jobTime(runTestStep, 800);
-	}
-}
-
-page.onAlert = page.onPrompt = page.onConfirm = function () {return true;}
 
 jobTime(nextBug, 200);
 
 function nextBug () {
 	if(runSpecificsBugTest && runSpecificsBugTest.length > 0){
 		bugIdx = bugs.indexOf(runSpecificsBugTest.shift());
+		if(bugIdx === -1){
+			console.log('ERROR: no test data for given bug id!')
+			phantom.exit();
+		}
 	}else if(runSpecificsBugTest && runSpecificsBugTest.length === 0){ // we were testing a specified subset of bugs only, and we're done!
 		bugIdx = bugs.length+1; // not so subtle hack..
 	}else{
@@ -112,6 +59,8 @@ function nextBug () {
 		ua = page.settings.userAgent = uadata[bugdata[bug].ua]['general.useragent.override'];
 		console.log('Will test '+bug)
 		if (bugdata[bug].testType === 'xhr') {
+			page.close();
+			page = createPage();
 			console.log('xhr test..');
 			page.open('about:blank');
 			xhrTestUrl = bugdata[bug].url;
@@ -126,8 +75,13 @@ function nextBug () {
 function loadSite(){
 	jobTime(function(){
 		console.log('TIMEOUT! for '+bug);
-		nextBug();
-	}, 20000); // backup timeout in case we get stuck at some point..
+		if (page.url.indexOf(bugdata[bug].url)>-1) { // we're not done loading, but let's try to run those tests anyway..
+			runTestStep();
+		}else{
+			registerTestResult('TIMEOUT - page did not load');
+			nextBug();
+		}
+	}, 60000); // backup timeout in case we get stuck at some point..
 	page.open(bugdata[bug].url, function (status) {
 		if(status == 'success'){
 			if(!xhrTestUrl){
@@ -145,7 +99,7 @@ function loadSite(){
 }
 var retryCount=0
 function runTestStep () {
-	jobTime(nextBug, 20000); // backup timeout in case we get stuck at some point..
+	jobTime(nextBug, 30000); // backup timeout in case we get stuck at some point..
 	if(xhrTestUrl)return; // handled elsewhere..
 	if (page.evaluateJavaScript('typeof hasViewportMeta === "function"')) {
 		if (bugdata[bug] && bugdata[bug].steps.length>currentTest) {
@@ -218,4 +172,67 @@ function writeResultsToFile(){
     	console.log(results);
     	phantom.exit();
     }
+}
+
+function createPage(){
+	var page = require('webpage').create();
+	var ua = page.settings.userAgent = "Mozilla/5.0 (Mobile; rv:26.0) Gecko/26.0 Firefox/26.0";
+	page.customHeaders = {
+	"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+	"Accept-Language": "en-us,en;q=0.5",
+	"Accept-Encoding": "gzip, deflate",
+	"Connection": "keep-alive"
+	};
+	page.viewportSize = { width:360, height:640 };
+	page.onResourceRequested = function (req) {
+		//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header.. 
+	    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})');
+	    if(bug && bugdata[bug] && bugdata[bug].injectScript){
+	    	//console.log('injecting: '+bugdata[bug].injectScript)
+	    	page.evaluateJavaScript(bugdata[bug].injectScript);
+	    }
+	};
+
+	page.onResourceError = function (res) {
+		var desc = 'received: '+res.url+'\n '+res.contentType;
+	    //console.log('received: ' + desc);
+	}
+	page.onResourceReceived = function (res) {
+	    //console.log(JSON.stringify(res, null, 4))
+		if(/application\/vnd\.wap(\.xhtml\+xml|\.wml|)/i.test(res.contentType)){
+			console.log('WAP! FAILURE!')
+			registerTestResult(false, 'WAP content');
+			page.stop()
+			jobTime(nextBug, 5);
+		}else if(xhrTestUrl && res.url === xhrTestUrl){
+			var obj = {text: res.body, headers:{}}
+			for(var i in res.headers)obj.headers[res.headers[i].name] = res.headers[i].value;
+			var result = bugdata[bug].steps[0](obj);
+			registerTestResult(result);
+			jobTime(nextBug, 10);
+		}
+	};
+
+	page.onLoadFinished = function (status, url, isFrame) {
+		//console.log('onLoadFinished '+status+' '+url+' '+isFrame);
+		
+		if(xhrTestUrl){
+			if(page.content === '<html><head></head><body></body></html>'){
+				// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
+				registerTestResult(false, 'WAP content');
+				jobTime(nextBug, 10);
+			}else{
+				//console.log(page.content)
+				registerTestResult(true, 'no WAP here, right?!');
+				// if next page is XHR, loading appears to fail *and* we'd see the source of the previous page.. Hence, load about:blank first
+				page.open('about:blank');
+				jobTime(nextBug, 10);
+			}
+		}else{
+			if(!isFrame)jobTime(runTestStep, 800);
+		}
+	}
+
+	page.onAlert = page.onPrompt = page.onConfirm = function () {return true;}
+	return page;
 }
