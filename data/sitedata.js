@@ -1796,12 +1796,6 @@ var bugdata = {
         ua:'FirefoxOS',
         steps:[function(){return location.hostname.indexOf('petardashd')>-1;}]
     },
-    '833841' : {
-        url:'http://www.santander.com.br',
-        ua:'FirefoxOS',
-        /* The problem is a reload loop, eventually causing an error page. If we end up on the real page with the ASP form, we're OK */
-        steps:[function(){ return document.getElementById('__VIEWSTATE')!=null; }]
-    },
     '883863' : {
         url:'http://m.easyjet.com',
         ua:'FirefoxOS',
@@ -1831,7 +1825,7 @@ var bugdata = {
         /* CNN has two mobile sites, we'd prefer not to get the simplistic one on cnnmobile.com */
         steps:[function(){return location.hostname.indexOf('edition.cnn.com')>-1 && mobileLinkOrScriptUrl();}]
     },
-    '806518' : {
+    '805660' : {
         url:'http://bradesco.com.br',
         ua:'FirefoxOS',
         steps:[function(){return location.hostname.indexOf('bradescocelular.com.br')>-1;}]
@@ -1939,7 +1933,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
-    "828389" : {
+    "828390" : {
 		url: 'http://20minutos.es',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.20minutos.es")>-1}]
@@ -1974,11 +1968,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
-	"826511" : {
-		url: 'http://amazon.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
 	"828388" : {
 		url: 'http://amazon.es',
 		 ua: "FirefoxOS",
@@ -1989,7 +1978,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.antena3.com")>-1 && hasViewportMeta()}]
 	},
-	"766979" : {
+	"730237" : {
 		url: 'http://apple.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
@@ -2029,7 +2018,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
-	"878650" : {
+	"878651" : {
 		url: 'http://b92.net',
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl()}]
@@ -2094,7 +2083,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.cdm.me")>-1 && hasViewportMeta()}]
 	},
-	"828357" : {
+	"828358" : {
 		url: 'http://ceneo.pl',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.ceneo.pl")>-1 && hasViewportMeta()}]
@@ -2194,11 +2183,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.ebay.es")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"876423" : {
-		url: 'http://economist.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasHandheldFriendlyMeta() && mobileLinkOrScriptUrl() && hasViewportMeta()}]
-	},
 	"843146" : {
 		url: 'http://edmunds.com',
 		 ua: "FirefoxOS",
@@ -2249,7 +2233,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.enfemenino.com")>-1 && hasHandheldFriendlyMeta() && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"815301" : {
+	"798525" : {
 		url: 'http://engadget.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
@@ -2308,11 +2292,6 @@ var automated_tests={
 		url: 'http://fotocasa.es',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.fotocasa.es")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
-	"843142" : {
-		url: 'http://foxnewsinsider.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
 	"828354" : {
 		url: 'http://gazeta.pl',
@@ -2453,16 +2432,6 @@ var automated_tests={
 		url: 'http://linkedin.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("touch.www.linkedin.com")>-1 && hasViewportMeta()}]
-	},
-	"761177" : {
-		url: 'http://live.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta()}]
-	},
-	"761177" : {
-		url: 'http://live.com/',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta()}]
 	},
 	"878273" : {
 		url: 'http://livescore.com',
@@ -2659,7 +2628,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.nemzetisport.hu")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"766983" : {
+	"878643" : {
 		url: 'http://netflix.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("secure.netflix.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
@@ -2784,7 +2753,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.r7.com")>-1 && hasViewportMeta()}]
 	},
-	"766976" : {
+	"725202" : {
 		url: 'http://reddit.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
@@ -2973,11 +2942,6 @@ var automated_tests={
 		url: 'http://wp.pl',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.wp.pl")>-1 && hasHandheldFriendlyMeta() && hasViewportMeta()}]
-	},
-	"766967" : {
-		url: 'http://www.bbc.co.uk/iplayer/radio',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}]
 	},
 	"899541" : {
 		url: 'http://www.blackberry.com/',
