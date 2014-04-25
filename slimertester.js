@@ -7,14 +7,20 @@ var results=[];
 var uadata = require('data/uadata.json');
 var page = createPage();
 
-var runSpecificsBugTest = null;
+var runSpecificBugTest = null;
 if(phantom.args.length > 0){
 	console.log('Will run tests for bugs '+phantom.args)
-	runSpecificsBugTest = phantom.args; // we can pass in a bug number on the command line to run that test only..
+	runSpecificBugTest = phantom.args; // we can pass in a bug number on the command line to run that test only..
 }
+
 
 var bugIdx=-1, currentTest=0, bug;
 var bugs = Object.keys(bugdata);
+// temporary hack to start from given bug..
+var startAtBugID = null; //"971576";
+if(startAtBugID && ! runSpecificBugTest){
+	bugIdx = bugs.indexOf(startAtBugID);
+}
 var jobFallbackTimeout, xhrTestUrl;
 function jobTime(doJob, delay){
 	//console.log('scheduling ' + doJob.name + ' in ' + delay + 'ms')
@@ -27,13 +33,13 @@ function jobTime(doJob, delay){
 jobTime(nextBug, 200);
 
 function nextBug () {
-	if(runSpecificsBugTest && runSpecificsBugTest.length > 0){
-		bugIdx = bugs.indexOf(runSpecificsBugTest.shift());
+	if(runSpecificBugTest && runSpecificBugTest.length > 0){
+		bugIdx = bugs.indexOf(runSpecificBugTest.shift());
 		if(bugIdx === -1){
 			console.log('ERROR: no test data for given bug id!')
-			phantom.exit();
+			setTimeout( function(){ phantom.exit(); }, 2000);
 		}
-	}else if(runSpecificsBugTest && runSpecificsBugTest.length === 0){ // we were testing a specified subset of bugs only, and we're done!
+	}else if(runSpecificBugTest && runSpecificBugTest.length === 0){ // we were testing a specified subset of bugs only, and we're done!
 		bugIdx = bugs.length+1; // not so subtle hack..
 	}else{
 		bugIdx++;
@@ -53,7 +59,7 @@ function nextBug () {
 	}*/
 	// end tmp: run only xhr bugs
 	if(bugIdx >= bugs.length || ! bug in bugdata){
-		page.open('data:text/html,<html><body><form method="post" action="http://arewecompatibleyet.hallvord.com/data/testing/upload.php"><input type=submit><textarea style="visibility:hidden" name="csvdata">'+encodeURIComponent(csvStr)+'</textarea></form><pre>'+encodeURIComponent(csvStr));
+		//page.open('data:text/html,<html><body><form method="post" action="http://arewecompatibleyet.hallvord.com/data/testing/upload.php"><input type=submit><textarea style="visibility:hidden" name="csvdata">'+encodeURIComponent(csvStr)+'</textarea></form><pre>'+encodeURIComponent(csvStr));
 		console.log('Done. Results were written to '+outfile)
 	}else if (bugdata[bug]) {
 		ua = page.settings.userAgent = uadata[bugdata[bug].ua]['general.useragent.override'];
@@ -84,17 +90,23 @@ function loadSite(){
 	}, 60000); // backup timeout in case we get stuck at some point..
 	page.open(bugdata[bug].url, function (status) {
 		if(status == 'success'){
+			//console.log('success for '+page.url);
 			if(!xhrTestUrl){
 				page.includeJs(testsFile, function(){
 					jobTime(runTestStep, 100);
 				});
 			}
 		}else{
+			console.log(page.url)
+		}
+		 /*else{
+			// for some reason you might get a "fail" message even though the page will load fine eventually..
+			// why? and what to do about it??
 			console.log('Failed to load site for '+bug+' '+bugdata[bug].url);
-			registerTestResult(false, 'Site failed to load'); // Sites fail due to for example redirect problems, better label them as failures..
+			registerTestResult(false, 'Site failed to load: '+status); // Sites fail due to for example redirect problems, better label them as failures..
 			bugIdx++;
 			jobTime(nextBug,10); // move on
-		}
+		}*/
 	});
 }
 var retryCount=0
@@ -168,9 +180,9 @@ function writeResultsToFile(){
     var f = fs.open(outfile, 'w');
     f.write(csvStr);
     f.close();
-    if(runSpecificsBugTest && runSpecificsBugTest.length === 0){
+    if(runSpecificBugTest && runSpecificBugTest.length === 0){
     	console.log(results);
-    	phantom.exit();
+    	setTimeout( function(){ phantom.exit(); }, 2000);
     }
 }
 
@@ -183,7 +195,7 @@ function createPage(){
 	"Accept-Encoding": "gzip, deflate",
 	"Connection": "keep-alive"
 	};
-	page.viewportSize = { width:360, height:640 };
+	page.viewportSize = { width:360, height:525 };
 	page.onResourceRequested = function (req) {
 		//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header.. 
 	    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})');
@@ -195,31 +207,39 @@ function createPage(){
 
 	page.onResourceError = function (res) {
 		var desc = 'received: '+res.url+'\n '+res.contentType;
-	    //console.log('received: ' + desc);
+	    console.log('received: ' + desc);
 	}
 	page.onResourceReceived = function (res) {
+		if(res.status == 301 || res.status == 302)return; // this is just an intermediate redirect response, wait for the real deal
 	    //console.log(JSON.stringify(res, null, 4))
+	    var result;
 		if(/application\/vnd\.wap(\.xhtml\+xml|\.wml|)/i.test(res.contentType)){
 			console.log('WAP! FAILURE!')
 			registerTestResult(false, 'WAP content');
 			page.stop()
 			jobTime(nextBug, 5);
 		}else if(xhrTestUrl && res.url === xhrTestUrl){
-			var obj = {text: res.body, headers:{}}
-			for(var i in res.headers)obj.headers[res.headers[i].name] = res.headers[i].value;
-			var result = bugdata[bug].steps[0](obj);
-			registerTestResult(result);
+			if (res.status == 200 && res.body === '' && ! ('contentType' in res)) {
+				// walks like a WAP, quacks like a WAP
+				result = false;
+			}else{
+				var obj = {text: res.body, headers:{}}
+				for(var i in res.headers)obj.headers[res.headers[i].name] = res.headers[i].value;
+				console.log(JSON.stringify(obj, null,2))				
+				result = bugdata[bug].steps[0](obj);
+			}
+			registerTestResult(result, 'header check complete');
 			jobTime(nextBug, 10);
 		}
 	};
 
 	page.onLoadFinished = function (status, url, isFrame) {
-		//console.log('onLoadFinished '+status+' '+url+' '+isFrame);
+		console.log('onLoadFinished '+status+' '+url+' '+isFrame);
 		
 		if(xhrTestUrl){
 			if(page.content === '<html><head></head><body></body></html>'){
 				// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
-				registerTestResult(false, 'WAP content');
+				registerTestResult(false, 'WAP content (empty page)');
 				jobTime(nextBug, 10);
 			}else{
 				//console.log(page.content)
@@ -233,6 +253,6 @@ function createPage(){
 		}
 	}
 
-	page.onAlert = page.onPrompt = page.onConfirm = function () {return true;}
+	page.onAlert = page.onPrompt = page.onConfirm = function (str) {console.log(str);return true;}
 	return page;
 }
