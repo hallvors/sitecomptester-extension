@@ -199,6 +199,12 @@ function createPage(){
 	page.onResourceRequested = function (req) {
 		//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header.. 
 	    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})');
+	    // pretend touch is enabled..
+	    page.evaluateJavaScript('window.ontouchstart = function(){}');
+	    // pretend we're using a small screen
+	    page.evaluateJavaScript('window.screen.__defineGetter__("width", function(){return 360})');
+	    page.evaluateJavaScript('window.screen.__defineGetter__("height", function(){return 640})');
+	    page.evaluateJavaScript('window.__defineGetter__("devicePixelRatio", function(){return 1.5})');
 	    if(bug && bugdata[bug] && bugdata[bug].injectScript){
 	    	//console.log('injecting: '+bugdata[bug].injectScript)
 	    	page.evaluateJavaScript(bugdata[bug].injectScript);
