@@ -197,18 +197,20 @@ function createPage(){
 	};
 	page.viewportSize = { width:360, height:525 };
 	page.onResourceRequested = function (req) {
-		//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header.. 
-	    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})');
-	    // pretend touch is enabled..
-	    page.evaluateJavaScript('window.ontouchstart = function(){}');
-	    // pretend we're using a small screen
-	    page.evaluateJavaScript('window.screen.__defineGetter__("width", function(){return 360})');
-	    page.evaluateJavaScript('window.screen.__defineGetter__("height", function(){return 640})');
-	    page.evaluateJavaScript('window.__defineGetter__("devicePixelRatio", function(){return 1.5})');
-	    if(bug && bugdata[bug] && bugdata[bug].injectScript){
-	    	//console.log('injecting: '+bugdata[bug].injectScript)
-	    	page.evaluateJavaScript(bugdata[bug].injectScript);
-	    }
+		try{
+			//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header.. 
+		    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})');
+		    // pretend touch is enabled..
+		    page.evaluateJavaScript('window.ontouchstart = function(){}');
+		    // pretend we're using a small screen
+		    page.evaluateJavaScript('window.screen.__defineGetter__("width", function(){return 360})');
+		    page.evaluateJavaScript('window.screen.__defineGetter__("height", function(){return 640})');
+		    page.evaluateJavaScript('window.__defineGetter__("devicePixelRatio", function(){return 1.5})');
+		    if(bug && bugdata[bug] && bugdata[bug].injectScript){
+		    	//console.log('injecting: '+bugdata[bug].injectScript)
+		    	page.evaluateJavaScript(bugdata[bug].injectScript);
+		    }
+		}catch(e){}
 	};
 
 	page.onResourceError = function (res) {
@@ -232,7 +234,7 @@ function createPage(){
 				var obj = {text: res.body, headers:{}}
 				for(var i in res.headers)obj.headers[res.headers[i].name] = res.headers[i].value;
 				console.log(JSON.stringify(obj, null,2))				
-				result = bugdata[bug].steps[0](obj);
+				result = bugdata[bug].steps[0](obj); // typically calls noWapContentPlease ..
 			}
 			registerTestResult(result, 'header check complete');
 			jobTime(nextBug, 10);
