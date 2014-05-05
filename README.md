@@ -1,22 +1,30 @@
 # sitecomptester-extension
 ## Background
 
-This is a Firefox extension (and slimerjs test runner) to run in-browser site compatibility test
+This is a SlimerJS test runner (formerly a Firefox extension) to run in-browser site compatibility test
 
 This extension comes with a list of "tests" in JSON format - found in the data/sitedata.js file. Tests are run against live sites.
 
 Each test is associated with a specific site compatibility problem in Mozilla's bug tracker.
 
-The tests can be run by clicking the extension's icon on the extension toolbar. It will run through all tests and finally list all results in CSV format.
+# Running tests
 
-However, before doing a test run it's best to do the following:
+You'll need
 
- * Delete session data (cache, cookies etc.)
- * Make sure log-ins for any sites you need to log in to are stored in the password manager in the profile you will use for testing. (These are used by the extension for logging in, *not yet* used by the slimerjs test runner)
+* an installation of [SlimerJS](http://slimerjs.org/)
+* a clone of this repository
 
-*Note*: This work originally started with an extension - recently most of the development is happening for the slimerjs test runner. The extension is considered obsolete.
+To run a single test, open the command prompt/terminal, go to your clone of this repository, and run slimerjs with arguments "slimertester.js" and a bug number. For example:
 
+    slimerjs slimertester.js 1003821
 
+You can pass in several bug numbers, separated by spaces. To run ALL tests, omit the bug number argument (this will take a while).
+
+The slimertester.js script will output results to the console while running, it will also create a CSV file in the working folder. The CSV file is named "results-" and the current date. Existing files will be overwritten by new ones.
+
+# Writing tests
+
+Here's information that helps you write tests. Additions welcome!
 
 ## Test format
 
