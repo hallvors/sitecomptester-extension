@@ -10,6 +10,16 @@ var hosts = {};
 
 */
 var bugdata = {
+    '1003821' : {
+        url:'http://santander.cl',
+        ua:'FirefoxOS',
+        steps:[function(){}, function(){return location.pathname.indexOf('/movil')>-1} ]
+    },
+    '1003806' : {
+        url:'http://www.lun.com/lunmobile//homepage.aspx',
+        ua:'FirefoxOS',
+        steps:[function(){return document.getElementById('UctNewsPaperArea1_rptNewsPaperArea_ctl01_imgNewsPaper').naturalWidth>200}]
+    },
     "995776": {
         "url": "http://www.inegi.org.mx", 
         "ua": "FirefoxOS", 
@@ -572,14 +582,16 @@ var bugdata = {
         "ua": "FirefoxOS", 
         "title": "youku.com sends desktop site to Firefox OS"
     }, 
-    "996435": {
+    /*drive.vw-up.jp is untestable due to slimerjs limitations, it seems (navigator.userAgent not being set in time)*/
+/*    "996435": {
         "url": "http://drive.vw-up.jp/", 
         "steps": [
-            function(){return hasViewportMeta();}
+            function(){},
+            function(){return location.pathname;}
         ], 
-        "ua": "FirefoxOS", 
+        "ua": "FirefoxAndroid",
         "title": "drive.vw-up.jp is blocking most browsers"
-    }, 
+    }, */
     "979155": {
         "url": "http://yoyopress.com", 
         "steps": [
@@ -656,7 +668,7 @@ var bugdata = {
         "url": "https://github.com/g13n/ua.js/blob/master/src/ua.js#L90-L100", 
         "ua": "FirefoxOS", 
         "steps": [
-            function(){return document.body.textContent.indexOf('isTablet: detect(/(ipad|android(?!.*mobile)|tablet)/i)') == -1}
+            function(){if(document.body.textContent.indexOf('isTablet:')==-1)return 'delay-and-retry'; return document.body.textContent.indexOf('isTablet: detect(/(ipad|android(?!.*mobile)|tablet)/i)') > -1}
         ], 
         "title": "ua.js fails to recognize FxOS Tablet UA as tablet device"
     }, 
@@ -738,9 +750,9 @@ var bugdata = {
     "972374": {
         "url": "http://ikea.com", 
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.ikea.com" && mobileLinkOrScriptUrl();}
+            function(){return hasViewportMeta() && location.hostname === "m.ikea.com" ;}
         ], 
-        "ua": "FirefoxOS1.4", 
+        "ua": "FirefoxOS1.4",
         "title": "ikea.com sends desktop site to Firefox OS"
     }, 
     '974797' : {
@@ -767,7 +779,7 @@ var bugdata = {
         "url": "http://www.wired.com/design/2014/01/super-detailed-photos-of-snowflakes-shot-with-hacked-camera/", 
         "ua": "FirefoxOS", 
         "steps": [
-            function(){return getComputedStyle(document.querySelector('.entry p')).wordWrap != 'break-word'}
+            function(){if(!getComputedStyle(document.querySelector('.entry p')))return 'delay-and-retry';return getComputedStyle(document.querySelector('.entry p')).wordBreak != 'break-word'}
         ], 
         "title": "Wired.com is not word wrapping properly for Firefox Android"
     },
@@ -1020,7 +1032,7 @@ var bugdata = {
         "ua": "FirefoxOS", 
         "steps": [
             function(){document.querySelector('li.thumb a').click(); },
-            function(){return document.querySelector('video')!=null;}
+            function(){if(document.querySelectorAll('video, object').length===0)return 'delay-and-retry'; return document.querySelector('video')!=null;}
         ], 
         "title": "screen.yahoo.com sniffing falls back to Flash, does not play video"
     }, 
@@ -1101,11 +1113,6 @@ var bugdata = {
         "ua": "FirefoxOS", 
         "title": "grooveshark.com doesn't recognize B2G as mobile"
     }, 
-    "755800" : {
-        url: 'http://etsy.com',
-         ua: "FirefoxOS",
-        steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
-    },
     "933642": {
         "url": "http://www.mysmartprice.com/", 
         "steps": [
@@ -1148,7 +1155,7 @@ var bugdata = {
         "ua": "FirefoxOS", 
         "title": "wfp is blocking Gecko/25 (bad behavior framework)"
     }, 
-
+    /*
     "732355": {
         "url": "http://m.flickr.com/photos/gen/2592947296/lightbox", 
         "ua": "FirefoxOS", 
@@ -1156,7 +1163,7 @@ var bugdata = {
             function(){try{return document.querySelector('div.img').style.backgroundImage != '';}catch(e){return 'delay-and-retry';};}
         ], 
         "title": "Photos are not displayed in photo slideshows at flickr.com"
-    }, 
+    }, */
     "957846": {
         "url": "http://wap.2kk.mobi", 
         "ua": "FirefoxOS", 
@@ -1322,18 +1329,10 @@ var bugdata = {
         "url": "https://touch.groupon.com/login", 
         "ua": "FirefoxOS", 
         "steps": [
-            function(){return /gradient/.test(getComputedStyle(document.getElementsByTagName('header')[0],'').background)}
+            function(){return /gradient/.test(getComputedStyle(document.getElementsByTagName('header')[0],'').backgroundImage)}
         ], 
         "title": "Groupon login page is white washed"
-    }, 
-    "890871": {
-        "url": "http://shop.mango.com/", 
-        "ua": "FirefoxOS", 
-        "steps": [
-            function(){return location.pathname.indexOf('mobile')>-1}
-        ], 
-        "title": "shop.mango.com doesn't display mobile site in Gaia browser"
-    }, 
+    },
     "959146": {
         "url": "http://zuoche.com/m/", 
         "ua": "FirefoxOS", 
@@ -1448,14 +1447,14 @@ var bugdata = {
         ], 
         "title": "weather.gr doesn't redirect to mobile site on Firefox OS"
     }, 
-    "931914": {
+    /*"931914": {
         "url": "http://www.ricardo.gr", 
         "ua": "FirefoxOS", 
         "steps": [
-            function(){return location.hostname.indexOf('m.ricardo')>-1 /*regression test*/}
+            function(){return location.hostname.indexOf('m.ricardo')>-1 }
         ], 
         "title": "ricardo.gr doesn't redirect to mobile site on Firefox OS"
-    },
+    },*/
     "957440" : {
         url: 'http://sina.cn/',
          ua: "FirefoxOS",
@@ -1474,11 +1473,6 @@ var bugdata = {
          /* This was oddly passing, though site was not fixed. Trying to add a check for the number of scripts.. */
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta() && document.getElementsByTagName('script').length<15}]
 	},
-    "936479" : {
-		url: 'http://www.tamiltvshows.net/',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() }]
-	},
     "935472" : {
 		url: 'http://blip.tv/commercialbreak/selling-out-colleen-ryan-6687803',
 		 ua: "FirefoxOS",
@@ -1496,7 +1490,7 @@ var bugdata = {
     '868298' : {
         url:'http://www.bing.com/videos/search?q=cats&FORM=HDRSC3',
         ua:'FirefoxAndroid',
-        steps:[function(){return document.getElementById('rfPaneIn')!=null}]
+        steps:[function(){return document.getElementsByClassName('vidr').length!=0}]
     },
     "913590" : {
 		url: 'http://www.lepoint.fr',
@@ -1506,7 +1500,7 @@ var bugdata = {
     "907518" : {
 		url: 'http://info.3g.qq.com/',
 		 ua: "FirefoxAndroid",
-		steps:[function(){return document.body.className.indexOf('index')>-1;}]
+		steps:[function(){return getComputedStyle(document.getElementsByClassName('main-nav-list')[0]).display === 'flex'; /*document.body.className.indexOf('index')>-1;*/}]
 	},
 	"922289" : {
 		url: 'http://info.3g.qq.com/',
@@ -1573,9 +1567,9 @@ var bugdata = {
         steps:[hasVideoTags]
     },
     '909420' : {
-        url:'http://plugins.svn.wordpress.org/wptouch/trunk/wptouch.php',
+        url:'http://plugins.svn.wordpress.org/wptouch/trunk/core/mobile-user-agents.php',
         ua:'FirefoxOS',
-        steps:[function(){ return unsafeWindow.document.body.textContent.indexOf('Firefox')>-1 }]
+        steps:[function(){ return unsafeWindow.document.body.textContent.indexOf('Firefox\', \'Mobile')>-1 }]
     },
     '907371' : {
         url:'http://s.huffpost.com/assets/css.php?f=mobileweb%2Fdev%2Fnormalize.css%2Cmobileweb%2Fdev%2Fapp.css%2Cbasic.css%2Cbuttons.css%2Cmobileweb%2Fnews%2Fauth.css&v=1380134457',
@@ -1647,7 +1641,7 @@ var bugdata = {
     '828431' : {
         url:'http://espn.go.com',
         ua:'FirefoxOS',
-        steps:[function(){return location.hostname.indexOf('m.espn')>-1}]
+        steps:[function(){ /*NOOP - let redirect kick in*/ },function(){return location.hostname.indexOf('m.espn')>-1}]
     },
     '809796' : {
         url:'http://espn.go.com',
@@ -1670,8 +1664,8 @@ var bugdata = {
     '826845' : {
         url:'http://techtudo.com.br/',
         ua:'FirefoxOS',
-        /*Note: the redirect is done from JS, so there is a chance of a race condition - hopefully the second test, running the JS directly, will handle it*/
-        steps:[function(){if(location.hostname.indexOf('m.techtudo.com')>-1)return true; try{ return glb.behavior.redirectToMobile.isMobile(navigator.userAgent);}catch(e){return 'test 826845 needs update, throws';}}]
+        /* Look for the "burger menu" element */
+        steps:[function(){return document.getElementsByClassName('button-menu').length>0;}]
     },
 	"828430" : {
 		url: 'http://meridiano.com.ve',
@@ -1747,7 +1741,7 @@ var bugdata = {
 		url: 'http://plotek.pl',
 		 ua: "FirefoxOS",
          /* there is some server-side sniffing and some JS involved. This JS variable is defined by the backend browser sniffing code */
-		steps:[function(){return window.gazeta_pl && gazeta_pl.mobileInfo && gazeta_pl.mobileInfo.isMobileDevice?true:false;}]
+		steps:[function(){return location.hostname === 'm.plotek.pl' || window.gazeta_pl && gazeta_pl.mobileInfo && gazeta_pl.mobileInfo.isMobileDevice?true:false;}]
 	},
     "826335" : {
 		url: 'http://globo.com',
@@ -1771,7 +1765,7 @@ var bugdata = {
     '843165' : {
         url:'http://virginatlantic.com',
         ua:'FirefoxOS',
-        steps:[function(){ return location.hostname.indexOf('mobile.virginatlantic.com')>-1 }]
+        steps:[function(){ return mobileLinkOrScriptUrl('vaa-mobile') }]
     },
     '840896' : {
         url:'http://nextbuses.mobi',
@@ -1905,7 +1899,7 @@ var bugdata = {
     '827869' : {
         url:'http://mail.google.com',
         ua:'FirefoxOS',
-        /* Log in, then test (pardon the pw - it's a throwaway testing account) */
+        /* Log in, then test */
         steps:[function(){tryLogin('Passwd', 'signIn')}, function(){return document.documentElement.className+document.body.className === ''}]
     },
     '826347' : {
@@ -2053,7 +2047,7 @@ var automated_tests={
 	"827627" : {
 		url: 'http://bol.uol.com.br',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.bol.uol.com.br")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return location.hostname.indexOf("m.bol.uol.com.br")>-1 && hasViewportMeta()}]
 	},
 	"828420" : {
 		url: 'http://booking.com',
@@ -2123,7 +2117,7 @@ var automated_tests={
 	"827631" : {
 		url: 'http://climatempo.com.br',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.climatempo.com.br")>-1 && hasViewportMeta()}]
+		steps:[function(){},function(){return location.hostname.indexOf("m.climatempo.com.br")>-1 }]
 	},
 	"784450" : {
 		url: 'http://cnet.com',
@@ -2140,22 +2134,12 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasHandheldFriendlyMeta() && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"848854" : {
-		url: 'http://deadline.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl()}]
-	},
 	"828380" : {
 		url: 'http://deser.pl',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.deser.pl")>-1 && hasViewportMeta()}]
 	},
-	"828443" : {
-		url: 'http://despegar.com.ve',
-		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.despegar.com.ve")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
-	},
-	"843136" : {
+    "843136" : {
 		url: 'http://deviantart.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
@@ -2785,11 +2769,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"890871" : {
-		url: 'http://shop.mango.com/',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl()}]
-	},
 	"884880" : {
 		url: 'http://skinnyvscurvy.com',
 		 ua: "FirefoxOS",
@@ -2967,7 +2946,7 @@ var automated_tests={
 	"848854" : {
 		url: 'http://www.deadline.com/',
 		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl()}]
+		steps:[function(){}, function(){return location.hostname === 'm.deadline.com'}]
 	},
 	"828403" : {
 		url: 'http://www.fotocasa.es/',
@@ -3008,11 +2987,6 @@ var automated_tests={
 		url: 'http://www.mercadolivre.com.br/',
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
-	},
-	"890864" : {
-		url: 'http://www.mibebeyyo.com/',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
 	"888708" : {
 		url: 'http://www.msz.gov.pl/en/',
@@ -3885,7 +3859,7 @@ var automated_tests={
         "testType": "xhr", 
         "title": "news.3g.cn sends WAP page"
     }, 
-    "957462": {
+   /* "957462": {
         "url": "http://kong.net", 
         "steps": [
             noWapContentPlease
@@ -3893,7 +3867,7 @@ var automated_tests={
         "ua": "FirefoxOS", 
         "testType": "xhr", 
         "title": "kong.net sends WAP page"
-    }, 
+    }, */
     "957465": {
         "url": "http://wap.51.com", 
         "steps": [
@@ -5694,7 +5668,7 @@ function cssCheck(classNameList, propertiesThatMustExist){
         for(var elms = document.getElementsByClassName(cn), j=0, el; el=elms[j]; j++){
             var style = getComputedStyle(el,null);
             for(var k=0, prop; prop = propertiesThatMustExist[k]; k++){
-                if( typeof style[k] === string && ! ( style[k] in cssFalseishStuff) )return true;
+                if( typeof style[k] === 'string' && ! ( style[k] in cssFalseishStuff) )return true;
             }
         }
     }
