@@ -1535,6 +1535,11 @@ var bugdata = {
     },
     '795319' : {
         url:'http://m.bing.com/maps',
+        ua:'FirefoxAndroid',
+        steps:[function(){ return document.scripts.length > 5; }]
+    },
+    '1005783' : {
+        url:'http://m.bing.com/maps',
         ua:'FirefoxOS',
         steps:[function(){ return document.scripts.length > 5; }]
     },
