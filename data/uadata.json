@@ -23,7 +23,7 @@
 "FirefoxOS1.4":{"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
 "general.platform.override":"Win32",
-"general.useragent.override":"Mozilla/5.0 (Mobile; rv:30) Gecko/30 Firefox/30",
+"general.useragent.override":"Mozilla/5.0 (Mobile; rv:30.0) Gecko/30.0 Firefox/30.0",
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""},
 
