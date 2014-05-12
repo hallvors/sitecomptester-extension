@@ -10,6 +10,197 @@ var hosts = {};
 
 */
 var bugdata = {
+    "1007945": {
+        "url": "http://mt.bp3.ford.com/#appsimHome", 
+        "ua": "FirefoxOS", 
+        "steps": [
+           function(){
+            var div, bg;
+            (div=document.body.appendChild(document.createElement('div'))).innerHTML='<ul class="summary-actions"><li class="focus"><span></span></li></ul>';
+            bg = getComputedStyle(div.getElementsByTagName('span')[0], '').background;
+            return background.indexOf('gradient')>-1
+           }
+        ], 
+        "title": "Ford.com buttons don't display properly in Firefox Android due to webkit CSS"
+    }, 
+    "1003809": {
+        "url": "http://falabella.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.falabella.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "falabella.com zoom or text size is different on Firefox OS"
+    }, 
+    "1003838": {
+        "url": "http://movistar.cl", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "movistar.cl sends desktop site to Firefox OS"
+    }, 
+    "1003840": {
+        "url": "http://elrastro.cl", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "www.rastro.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "elrastro.cl sends desktop site to Firefox OS"
+    }, 
+    "1003830": {
+        "url": "http://www.chileautos.cl/chileautos.asp", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.chileautos.cl";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "chileautos.cl sends desktop site to Firefox OS"
+    }, 
+    "1003831": {
+        "url": "http://biobiochile.cl", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.biobiochile.cl";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "biobiochile.cl sends desktop site to Firefox OS"
+    },
+    '979085' : {
+        url:'http://www.sii.cl',
+        ua:'FirefoxOS',
+        steps:[function(){return location.hostname === 'm.sii.cl'}]
+    },
+    "1001563": {
+        "url": "http://online.wsj.com/news/articles/SB10001424052702304788404579522612497528586", 
+        "steps": [
+            function(){
+                for(var elms=document.querySelectorAll('meta[name="viewport"]'),el,i=0;el=elms[i];i++){
+                    if(/width=device-width/i.test(el.content))return false;
+                }
+                return true;
+            }
+        ], 
+        "ua": "FirefoxAndroid", 
+        "title": "Double-tap zoom does not work on wsj.com"
+    }, 
+    "1008873": {
+        "url": "http://depor.pe", 
+        "steps": [
+            function(){return location.hostname === "m.depor.pe";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "depor.pe sends desktop site to Firefox OS, can't play video"
+    }, 
+    "1008877": {
+        "url": "http://miclaro.com.pe", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "miclaro.com.pe sends simplified site to Firefox OS"
+    }, 
+    "1008509": {
+        "url": "http://origo.hu", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.origo.hu";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "origo.hu sends desktop site to Firefox OS"
+    }, 
+    "1008881": {
+        "url": "http://investing.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "touch.investing.com" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "investing.com sends desktop site to Firefox OS"
+    }, 
+    "1008889": {
+        "url": "http://state.gov", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.state.gov" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "state.gov sends desktop site to Firefox OS and Firefox on Android"
+    }, 
+    "1008886": {
+        "url": "http://wellsfargo.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.wellsfargo.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "wellsfargo.com sends desktop site to Firefox OS"
+    }, 
+    "996435": {
+        "url": "http://drive.vw-up.jp/", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "drive.vw-up.jp is blocking most browsers"
+    }, 
+    "1008868": {
+        "url": "http://sulia.com", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "sulia.com sends desktop site to Firefox OS"
+    }, 
+    "1004974": {
+        "url": "http://money.rediff.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.money.rediff.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "money.rediff.com sends desktop site to Firefox OS"
+    }, 
+    "1004975": {
+        "url": "http://kotaksecurities.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "mobile.kotaksecurities.com" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "kotaksecurities.com sends desktop site to Firefox OS"
+    }, 
+    "1004971": {
+        "url": "http://scoop.it", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "scoop.it sends desktop site to Firefox OS"
+    }, 
+    "1008864": {
+        "url": "http://vizionplus.al", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "vizionplus.al (and vizionplus.tv) sends desktop site to Firefox OS"
+    }, 
+    "1005882": {
+        "url": "http://infonews.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.infonews.com" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "infonews.com sends desktop site to Firefox OS"
+    }, 
+    "1005476": {
+        "url": "http://interia.pl", 
+        "steps": [
+            function(){return location.hostname === "m.interia.pl";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Interia.pl sends desktop page to Firefox OS"
+    }, 
+    "1008510": {
+        "url": "http://blog.hu", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "blog.hu sends desktop site to Firefox OS"
+    },
     '1003821' : {
         url:'http://santander.cl',
         ua:'FirefoxOS',
@@ -358,7 +549,7 @@ var bugdata = {
         "ua": "FirefoxOS", 
         "title": "inews.bg sends desktop site to Firefox OS"
     }, 
-    "999986": {
+    "1008509": {
         "url": "http://origo.hu", 
         "steps": [
             function(){return hasViewportMeta() && location.hostname === "m.origo.hu";}
