@@ -10,6 +10,279 @@ var hosts = {};
 
 */
 var bugdata = {
+    "976749": {
+        "url": "https://www.google.me/", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.getElementsByClassName('signin-link').length>0}
+        ], 
+        "title": "Missing connect button in main google page in certain locales"
+    }, 
+    "952778": {
+        "url": "http://app.nytimes.com/", 
+        "ua": "FirefoxAndroid", 
+        "steps": [
+            function(){return document.body.textContent.indexOf('Your browser is not supported')===-1}
+        ], 
+        "title": "app.nytimes.com does not support Firefox for Android"
+    }, 
+    "1008511": {
+        "url": "http://freemail.hu", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return location.href.indexOf('szimpla/') === -1}
+        ], 
+        "title": "freemail.hu sends desktop site to Firefox OS and Firefox on Android"
+    }, 
+    "972268": {
+        "url": "http://news.youku.com/qihou2012/index", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            /* guesswork based on info in bug report */
+            function(){return Youku._IsHtml5 != false}
+        ], 
+        "title": "[Sora][Browser]Interface display abnormally,Pictures and characters on the screen do not overlap"
+    }, 
+    "981390": {
+        "url": "http://web.ad2games.com/applift/friv/v2/redirect.html", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            /* JS sniffing on page should take us somewhere else.. */
+            function(){},
+            function(){return location.href === 'http://web.ad2games.com/applift/friv/v2/redirect.html' }
+        ], 
+        "title": "friv.com has broken layout in Firefox OS"
+    }, 
+    "1005122": {
+        "url": "http://larojadeportes.cl", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.getElementById('menu-menu-principal')!=null}
+        ], 
+        "title": "larojadeportes.cl sends desktop site to Firefox OS"
+    }, 
+    "1001459": {
+        "url": "http://thedailyshow.cc.com/", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return !/^\s+$/.test(document.getElementById('tier_1').textContent)}
+        ], 
+        "title": "Comedy Central \"The Daily Show\" web site has no content when loaded in Firefox for Android (or with Firefox for Android user agent string)"
+    }, 
+    "1005131": {
+        "url": "http://trabajando.cl", 
+        "ua": "FirefoxOS", 
+        "steps": [
+           function(){return location.hostname === 'm.trabajando.cl'}
+        ], 
+        "title": "trabajando.cl sends desktop site to Firefox OS"
+    }, 
+    "953213": {
+        "url": "http://www.mobilefringeserver.com/mw/southcentre/index.html", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.getElementsByClassName('ui-btn-text').length>1}
+        ], 
+        "title": "Southcentre Mall website doesn't work in Firefox"
+    }, 
+    "953240": {
+        "url": "http://sports.yahoo.com/blogs/nhl-puck-daddy/top-10-hockey-fights-2013-puck-daddy-review-205905009--nhl.html", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return getComputedStyle(document.body).display != '-moz-box'}
+        ], 
+        "title": "Text cut off on mobile Yahoo, with a wide iframe being ineffectively clamped by \"max-width: 100%\", several layers deep inside of a -moz-box"
+    }, 
+    "992851": {
+        "url": "http://www.google.com/flights", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            /* simplest way to look for the problem: find the right script (external, contains 'cache' - hi GWT), 
+                load that script, look for the problematic parts
+             */
+            function(){for(var el,i=0; el=document.scripts[i]; i++){if(el.src.indexOf('cache')>-1){location=el.src;break;}}},
+            /* omitting function name - will change - but if there are false positives moving to a regexp could fix that.. */
+            function(){return ! (document.body.textContent.indexOf('(a){return a.scrollTop||0}') > -1 && document.body.textContent.indexOf('($doc.body)|0)+') > -1)}
+        ], 
+        "title": "Google flight search: book button does not work"
+    },
+    "1002322": {
+        "url": "http://www.musicradar.com", 
+        "steps": [
+            function(){return location.hostname === "m.musicradar.com" && mobileLinkOrScriptUrl() && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Musicradar.com sends desktop site to Firefox OS"
+    }, 
+    "1008883": {
+        "url": "http://mastercard.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.mastercard.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "mastercard.com sends desktop site to Firefox OS"
+    }, 
+    "1005128": {
+        "url": "http://www.portalinmobiliario.com", 
+        "steps": [
+            function(){return location.hostname === "m.portalinmobiliario.com";}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "portalinmobiliario.com sends desktop site to Firefox OS and Firefox on Android"
+    }, 
+    "1002592": {
+        "url": "http://www.classicsmonthly.com/", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.classicsmonthly.com" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Classicsmonthly.com sends desktop site to Firefox OS"
+    }, 
+    "1002525": {
+        "url": "http://www.bikeradar.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.bikeradar.com" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Bikeradar.com sends desktop site to Firefox OS"
+    }, 
+    "1002666": {
+        "url": "http://www.fastbikesmag.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.fastbikesmag.com" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Fastbikesmag.com sends desktop site to Firefox OS"
+    }, 
+    "1004416": {
+        "url": "http://internetactu.blog.lemonde.fr/2014/02/14/de-quoi-les-google-bus-sont-ils-le-symptome/", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "*.blog.lemonde.fr sends the desktop content to Firefox OS"
+    }, 
+    "1005286": {
+        "url": "http://eldefinido.cl", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "eldefinido.cl sends desktop site to Firefox OS and Firefox for Android"
+    }, 
+    "1002583": {
+        "url": "http://www.classicfordmag.co.uk/", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.classicfordmag.co.uk" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Classicfordmag.co.uk sends desktop site to Firefox OS"
+    }, 
+    "1008885": {
+        "url": "http://www.scotiabank.com", 
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "scotiabank.com sends desktop site to Firefox OS"
+    }, 
+    "1002661": {
+        "url": "http://www.edge-online.com", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.edge-online.com" && mobileLinkOrScriptUrl() && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Edge-online.com sends desktop site to Firefox OS"
+    }, 
+    "1002657": {
+        "url": "http://www.cyclingnews.com/", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.cyclingnews.com" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Cyclingnews.com sends desktop site to Firefox OS"
+    }, 
+    "1002511": {
+        "url": "http://www.techradar.com", 
+        "steps": [
+            function(){return location.hostname === "m.techradar.com" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Techradar.com sends desktop site to Firefox OS"
+    }, 
+    "1002321": {
+        "url": "http://www.epagine.fr/", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "epagine.fr sends desktop content to Firefox OS"
+    }, 
+    "1005135": {
+        "url": "http://soychile.cl", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "soychile.cl sends desktop site to Firefox OS"
+    }, 
+    "1002623": {
+        "url": "http://www.sfx.co.uk", 
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.sfx.co.uk" && hasHandheldFriendlyMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Sfx.co.uk sends desktop site to Firefox OS"
+    }, 
+    "1005288": {
+        "url": "http://despegar.cl", 
+        "steps": [
+            function(){return location.hostname === "m.despegar.cl" && mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "despegar.cl sends desktop site to Firefox OS"
+    },
+    "865043": {
+        "url": "http://news.google.com/", 
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "A better news.google.com for Firefox OS"
+    },
+    "984126": {
+        "url": "http://boston.menupages.com/restaurants/mike-and-pattys/menu", 
+        "steps": [
+            function(){return hasViewportMeta();}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "Text cut off on menupages.com"
+    },
+    "964694": {
+        "url": "http://bing.com", 
+        "steps": [
+            function(){return document.getElementById('bgDiv').style.backgroundImage.indexOf('Resolution')===-1;}
+        ], 
+        "ua": "FirefoxOS", 
+        "title": "[Tablet] - Bing.com background is not properly resized for tablets"
+    },
+    "1003684": {
+        "url": "http://www.jp-bank.japanpost.jp/", 
+        "ua": "FirefoxOS", 
+        "steps": [
+            function(){return document.querySelector('a[href*="/sp/sp_index"]') ? true : false;}
+        ], 
+        "title": "jp-bank.japanpost.jp triggers a banner for certain mobile devices only"
+    },
+    "966868": {
+        "url": "http://www.nick.com/videos/", 
+        "ua": "FirefoxAndroid", 
+        "steps": [
+            function(){return document.querySelector('a.episode').click()},
+            function(){if(!document.getElementById('video-player'))return 'delay-and-retry'; return hasVideoTags();}
+        ], 
+        "title": "nick.com doesn't play videos in Firefox OS or Firefox on Android"
+    }, 
     "1007945": {
         "url": "http://mt.bp3.ford.com/#appsimHome", 
         "ua": "FirefoxOS", 
