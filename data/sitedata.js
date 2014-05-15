@@ -541,7 +541,7 @@ var bugdata = {
     }, 
     "915853": {
         "url": "http://matthewhudson.me/projects/device.js/", 
-        "ua": "FirefoxOS", 
+        "ua": "FirefoxOSZTE",
         "steps": [
             /* the demo page has convenient detection methods :) */
             function(){return device.fxosPhone(); }
