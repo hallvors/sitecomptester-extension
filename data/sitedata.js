@@ -4,12 +4,19 @@ var hosts = {};
     '' : {
         url:'',
         ua:'',
-        steps:[function(){return }]
+        steps:[function(){return }],
+        title:""
     },
 
 
 */
 var bugdata = {
+    '945483' : {
+        url:'http://www.nhl.com/ice/m_news.htm?id=719137',
+        ua:'FirefoxAndroid',
+        steps:[function(){ if(!document.querySelector('video,object'))return 'delay-and-retry'; return hasVideoTags(); }],
+        title:'HTML video playback for NeuLion video player [NFL, NHL, NBA, MLS, UFCtv, Premier League, etc.]'
+    },
     "976749": {
         "url": "https://www.google.me/", 
         "ua": "FirefoxOS", 
@@ -22,7 +29,7 @@ var bugdata = {
         "url": "http://app.nytimes.com/", 
         "ua": "FirefoxAndroid", 
         "steps": [
-            function(){return document.body.textContent.indexOf('Your browser is not supported')===-1}
+            function(){return document.body.textContent.indexOf('Your browser is not supported')===-1 && document.body.textContent.indexOf('not yet support smartphone')===-1 }
         ], 
         "title": "app.nytimes.com does not support Firefox for Android"
     }, 
@@ -30,7 +37,7 @@ var bugdata = {
         "url": "http://freemail.hu", 
         "ua": "FirefoxOS", 
         "steps": [
-            function(){return location.href.indexOf('szimpla/') === -1}
+            function(){if(location.pathname === '/')return 'delay-and-retry';  return location.href.indexOf('szimpla/') != -1}
         ], 
         "title": "freemail.hu sends desktop site to Firefox OS and Firefox on Android"
     }, 
@@ -49,7 +56,7 @@ var bugdata = {
         "steps": [
             /* JS sniffing on page should take us somewhere else.. */
             function(){},
-            function(){return location.href === 'http://web.ad2games.com/applift/friv/v2/redirect.html' }
+            function(){return location.href !== 'http://web.ad2games.com/applift/friv/v2/redirect.html' }
         ], 
         "title": "friv.com has broken layout in Firefox OS"
     }, 
@@ -63,7 +70,7 @@ var bugdata = {
     }, 
     "1001459": {
         "url": "http://thedailyshow.cc.com/", 
-        "ua": "FirefoxOS", 
+        "ua": "FirefoxAndroid", 
         "steps": [
             function(){return !/^\s+$/.test(document.getElementById('tier_1').textContent)}
         ], 
@@ -79,7 +86,7 @@ var bugdata = {
     }, 
     "953213": {
         "url": "http://www.mobilefringeserver.com/mw/southcentre/index.html", 
-        "ua": "FirefoxOS", 
+        "ua": "FirefoxAndroid", 
         "steps": [
             function(){return document.getElementsByClassName('ui-btn-text').length>1}
         ], 
@@ -89,7 +96,7 @@ var bugdata = {
         "url": "http://sports.yahoo.com/blogs/nhl-puck-daddy/top-10-hockey-fights-2013-puck-daddy-review-205905009--nhl.html", 
         "ua": "FirefoxOS", 
         "steps": [
-            function(){return getComputedStyle(document.body).display != '-moz-box'}
+            function(){if(document.getElementById('yog-page') === null) return 'delay-and-retry'; return getComputedStyle(document.getElementById('yog-page')).display != '-moz-box' }
         ], 
         "title": "Text cut off on mobile Yahoo, with a wide iframe being ineffectively clamped by \"max-width: 100%\", several layers deep inside of a -moz-box"
     }, 
@@ -4839,7 +4846,7 @@ var automated_tests={
     "960440": {
         "url": "http://cookpad.com", 
         "steps": [
-            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+            function(){return hasViewportMeta();}
         ], 
         "ua": "FirefoxOS", 
         "title": "cookpad.com sends desktop site to Firefox OS"
@@ -4871,7 +4878,8 @@ var automated_tests={
     "960433": {
         "url": "http://biglobe.ne.jp", 
         "steps": [
-            function(){return location.hostname === "biglobe.ne.jp";}
+            /* this code looks for the "switch to smartphone site" link that is a part of the desktop and tablet sites */
+            function(){ if(!document.getElementById('devchange'))return 'delay-and-retry'; return ! document.querySelector('a[onclick*="B.devChange(\'sp\')"]');}
         ], 
         "ua": "FirefoxOS", 
         "title": "biglobe.ne.jp sends desktop site to Firefox OS"
@@ -4951,7 +4959,7 @@ var automated_tests={
     "960030": {
         "url": "http://us.jobrapido.com", 
         "steps": [
-            function(){return mobileLinkOrScriptUrl();}
+            function(){return document.documentElement.className.indexOf('mobile')>-1;}
         ], 
         "ua": "FirefoxOS", 
         "title": "jobrapido.com sends desktop site to Firefox OS"
@@ -5225,6 +5233,7 @@ var automated_tests={
     "971228": {
         "url": "http://www.geek.com", 
         "steps": [
+            function(){/*NOOP - js redirect must kick in*/},
             function(){/*NOOP - js redirect must kick in*/},
             function(){return location.hostname === "mobile.geek.com";}
         ], 
@@ -5826,7 +5835,7 @@ var automated_tests={
     "974791": {
         "url": "http://moneycontrol.com", 
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.moneycontrol.com";}
+            function(){return location.hostname === "m.moneycontrol.com";}
         ], 
         "ua": "FirefoxOS", 
         "title": "moneycontrol.com sends desktop site to Firefox OS"
