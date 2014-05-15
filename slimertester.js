@@ -5,6 +5,7 @@ var date = new Date();
 var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
 var results=[];
 var uadata = require('data/uadata.json');
+var ua;
 var page = createPage();
 
 var runSpecificBugTest = null;
@@ -19,7 +20,7 @@ var bugs = Object.keys(bugdata);
 // temporary hack to start from given bug..
 var startAtBugID = null; //"971576";
 if(startAtBugID && ! runSpecificBugTest){
-	bugIdx = bugs.indexOf(startAtBugID);
+	bugIdx = bugs.indexOf(startAtBugID)-1;
 }
 var jobFallbackTimeout, xhrTestUrl;
 function jobTime(doJob, delay){
@@ -185,10 +186,28 @@ function writeResultsToFile(){
     	setTimeout( function(){ phantom.exit(); }, 2000);
     }
 }
+function injectJS(page, ua){
+	try{
+		//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header..
+	    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "' + ua + '"})');
+	    // pretend touch is enabled..
+	    page.evaluateJavaScript('window.ontouchstart = function(){}');
+	    // pretend we're using a small screen
+	    page.evaluateJavaScript('window.screen.__defineGetter__("width", function(){return 360})');
+	    page.evaluateJavaScript('window.screen.__defineGetter__("height", function(){return 640})');
+	    page.evaluateJavaScript('window.__defineGetter__("devicePixelRatio", function(){return 1.5})');
+	    if(bug && bugdata[bug] && bugdata[bug].injectScript){
+	        //console.log('injecting: '+bugdata[bug].injectScript)
+	        page.evaluateJavaScript(bugdata[bug].injectScript);
+	    }
+	}catch(e){console.log(e);}
+
+}
+
 
 function createPage(){
 	var page = require('webpage').create();
-	var ua = page.settings.userAgent = "Mozilla/5.0 (Mobile; rv:26.0) Gecko/26.0 Firefox/26.0";
+	ua = page.settings.userAgent = "Mozilla/5.0 (Mobile; rv:26.0) Gecko/26.0 Firefox/26.0";
 	page.customHeaders = {
 	"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 	"Accept-Language": "en-us,en;q=0.5",
@@ -197,20 +216,7 @@ function createPage(){
 	};
 	page.viewportSize = { width:360, height:525 };
 	page.onResourceRequested = function (req) {
-		try{
-			//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header.. 
-		    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "'+ua+'"})');
-		    // pretend touch is enabled..
-		    page.evaluateJavaScript('window.ontouchstart = function(){}');
-		    // pretend we're using a small screen
-		    page.evaluateJavaScript('window.screen.__defineGetter__("width", function(){return 360})');
-		    page.evaluateJavaScript('window.screen.__defineGetter__("height", function(){return 640})');
-		    page.evaluateJavaScript('window.__defineGetter__("devicePixelRatio", function(){return 1.5})');
-		    if(bug && bugdata[bug] && bugdata[bug].injectScript){
-		    	//console.log('injecting: '+bugdata[bug].injectScript)
-		    	page.evaluateJavaScript(bugdata[bug].injectScript);
-		    }
-		}catch(e){}
+		injectJS(page, ua);
 	};
 
 	page.onResourceError = function (res) {
@@ -220,6 +226,7 @@ function createPage(){
 	page.onResourceReceived = function (res) {
 		if(res.status == 301 || res.status == 302)return; // this is just an intermediate redirect response, wait for the real deal
 	    //console.log(JSON.stringify(res, null, 4))
+	    injectJS(page, ua);
 	    var result;
 		if(/application\/vnd\.wap(\.xhtml\+xml|\.wml|)/i.test(res.contentType)){
 			console.log('WAP! FAILURE!')
