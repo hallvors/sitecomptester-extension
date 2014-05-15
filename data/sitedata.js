@@ -220,7 +220,7 @@ var bugdata = {
     "1002321": {
         "url": "http://www.epagine.fr/", 
         "steps": [
-            function(){return hasViewportMeta();}
+            function(){return location.hostname === 'm.epagine.fr';}
         ], 
         "ua": "FirefoxOS", 
         "title": "epagine.fr sends desktop content to Firefox OS"
@@ -270,7 +270,7 @@ var bugdata = {
         "steps": [
             function(){return document.getElementById('bgDiv').style.backgroundImage.indexOf('Resolution')===-1;}
         ], 
-        "ua": "FirefoxOS", 
+        "ua": "FirefoxAndroidTablet", 
         "title": "[Tablet] - Bing.com background is not properly resized for tablets"
     },
     "1003684": {
@@ -408,14 +408,6 @@ var bugdata = {
         ], 
         "ua": "FirefoxOS", 
         "title": "wellsfargo.com sends desktop site to Firefox OS"
-    }, 
-    "996435": {
-        "url": "http://drive.vw-up.jp/", 
-        "steps": [
-            function(){return hasViewportMeta();}
-        ], 
-        "ua": "FirefoxOS", 
-        "title": "drive.vw-up.jp is blocking most browsers"
     }, 
     "1008868": {
         "url": "http://sulia.com", 
@@ -1053,16 +1045,15 @@ var bugdata = {
         "ua": "FirefoxOS", 
         "title": "youku.com sends desktop site to Firefox OS"
     }, 
-    /*drive.vw-up.jp is untestable due to slimerjs limitations, it seems (navigator.userAgent not being set in time)*/
-/*    "996435": {
+    "996435": {
         "url": "http://drive.vw-up.jp/", 
         "steps": [
             function(){},
-            function(){return location.pathname;}
+            function(){return location.pathname.indexOf('not-supported') === -1;}
         ], 
         "ua": "FirefoxAndroid",
         "title": "drive.vw-up.jp is blocking most browsers"
-    }, */
+    }, 
     "979155": {
         "url": "http://yoyopress.com", 
         "steps": [
