@@ -6,6 +6,13 @@
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""},
 
+"FirefoxOSZTE":{"general.appname.override":"Netscape",
+"general.appversion.override":"5.0 ()",
+"general.platform.override":"Win32",
+"general.useragent.override":"Mozilla/5.0 (Mobile; ZTEOPEN; rv:18.1) Gecko/18.1 Firefox/18.1",
+"general.useragent.vendor":"",
+"general.useragent.vendorSub":""},
+
 "FirefoxOS":{"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
 "general.platform.override":"",
