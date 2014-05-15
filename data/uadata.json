@@ -8,21 +8,21 @@
 
 "FirefoxOS":{"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
-"general.platform.override":"Win32",
+"general.platform.override":"",
 "general.useragent.override":"Mozilla/5.0 (Mobile; rv:18.0) Gecko/18.0 Firefox/18.0",
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""},
 
 "FirefoxOS1.1":{"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
-"general.platform.override":"Win32",
+"general.platform.override":"",
 "general.useragent.override":"Mozilla/5.0 (Mobile; rv:18.1) Gecko/18.1 Firefox/18.1",
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""},
 
 "FirefoxOS1.4":{"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
-"general.platform.override":"Win32",
+"general.platform.override":"",
 "general.useragent.override":"Mozilla/5.0 (Mobile; rv:30.0) Gecko/30.0 Firefox/30.0",
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""},
@@ -36,14 +36,14 @@
 
 "FirefoxAndroid" : {"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
-"general.platform.override":"Win32",
+"general.platform.override":"",
 "general.useragent.override":"Mozilla/5.0 (Android; Mobile; rv:23.0) Gecko/23.0 Firefox/23.0",
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""},
 
 "FirefoxAndroidTablet" : {"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
-"general.platform.override":"Win32",
+"general.platform.override":"",
 "general.useragent.override":"Mozilla/5.0 (Android; Tablet; rv:25.0) Gecko/25.0 Firefox/25.0",
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""}
