@@ -11,6 +11,23 @@ var hosts = {};
 
 */
 var bugdata = {
+    '989584' : {
+        url:'https://www.delta.com/PCCOciWeb/DisplayTripSummaryNext.action',
+        ua:'FirefoxDesktop',
+        steps:[function(){
+            var ver;for(let el,i=0;el=document.scripts[i];i++){
+                if(el.src.indexOf('?ver=')>-1)ver = el.src.substring(el.src.indexOf('?ver=')+5, el.src.length);
+            }
+            location = 'https://content.delta.com/content/dam/delta-applications/pcc/oci_'+ver.substr(0,6)+'/1/shared/jawr/js/ocibundle.js?ver='+ver;
+
+        },
+        function(){
+            return document.body.textContent.indexOf('\nvar opener={open:') === -1;
+        }
+        ],
+        title:""
+    },
+
     '945483' : {
         url:'http://www.nhl.com/ice/m_news.htm?id=719137',
         ua:'FirefoxAndroid',
