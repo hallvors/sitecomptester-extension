@@ -2926,11 +2926,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
-	"876423" : {
-		url: 'http://www.economist.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasHandheldFriendlyMeta() && mobileLinkOrScriptUrl() && hasViewportMeta()}]
-	},
 	"884240" : {
 		url: 'http://m.europapress.es',
 		 ua: "FirefoxOS",
