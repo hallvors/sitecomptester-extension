@@ -1179,7 +1179,7 @@ var bugdata = {
         "url": "http://m.tieyou.com", 
         "steps": [
             function(){},/* js sniffing needs some time to run - a dummy function for the first load */
-            function(){return hasViewportMeta() && location.hostname === "m.tieyou.com" && mobileLinkOrScriptUrl();}
+            function(){ if(window.IsPC)return ! window.IsPC();  return hasViewportMeta() && location.hostname === "m.tieyou.com" && mobileLinkOrScriptUrl();}
         ], 
         "ua": "FirefoxOS", 
         "title": "m.tieyou.com sends desktop site to Firefox OS"
@@ -1241,7 +1241,7 @@ var bugdata = {
         "url": "http://www.wired.com/design/2014/01/super-detailed-photos-of-snowflakes-shot-with-hacked-camera/", 
         "ua": "FirefoxOS", 
         "steps": [
-            function(){if(!getComputedStyle(document.querySelector('.entry p')))return 'delay-and-retry';return getComputedStyle(document.querySelector('.entry p')).wordBreak != 'break-word'}
+            function(){if(!document.querySelector('.entry p'))return 'delay-and-retry';return getComputedStyle(document.querySelector('.entry p')).wordBreak != 'break-word'}
         ], 
         "title": "Wired.com is not word wrapping properly for Firefox Android"
     },
@@ -2816,11 +2816,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return document.getElementById('js-globalnav').className.indexOf('is-fixed')==-1;}]
 	},
-	"786065" : {
-		url: 'http://ig.com.br',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
 	"828392" : {
 		url: 'http://infojobs.net',
 		 ua: "FirefoxOS",
@@ -3510,17 +3505,23 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta()}]
 	},*/
+    /*Both Wyborcza sites do a very complicated "client-side sniffing sets cookie, server-side logic redirects based on cookie" thing..
+     All the sniffing takes place on a /0,0.html URL so if we're still there it's too early to do the actual test..
+    */
 	"828366" : {
 		url: 'http://wyborcza.biz',
 		 ua: "FirefoxOS",
-		steps:[function(){ /*let js sniffing run*/ }, function(){return location.hostname.indexOf("m.wyborcza.biz")>-1 && hasViewportMeta()}]
+		steps:[
+            function(){ if(location.pathname === '/' || location.pathname.indexOf('/0,0') === 0)return 'delay-and-retry' },
+            function(){return location.hostname.indexOf("m.wyborcza.biz")>-1 && hasViewportMeta()}
+        ]
 	},
 	"828378" : {
 		url: 'http://wyborcza.pl',
 		 ua: "FirefoxOS",
 		steps:[
-            function(){ /*let js sniffing run*/ },
-            function(){return location.hostname.indexOf("m.wyborcza.pl")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}
+            function(){ if(location.pathname === '/' || location.pathname.indexOf('/0,0') === 0)return 'delay-and-retry' },
+            function(){return location.hostname.indexOf("m.wyborcza.pl")>-1 && hasViewportMeta() /*(regression test, expected to pass)*/}
         ]
 	},
 	"878286" : {
