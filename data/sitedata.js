@@ -3046,7 +3046,8 @@ var automated_tests={
 	"884863" : {
 		url: 'http://mobile.reuters.com',
 		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}]
+		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}],
+        title: "reuters.com serves Desktop Content to FirefoxOS"
 	},
 	"878275" : {
 		url: 'http://mondo.rs',
