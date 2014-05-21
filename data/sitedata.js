@@ -11,6 +11,12 @@ var hosts = {};
 
 */
 var bugdata = {
+    '976013' : {
+        url:'http://people.mozilla.org/~atrain/mobile/tests/google-translate.html',
+        ua:'FirefoxAndroid',
+        steps:[function(){try{return document.getElementsByClassName('goog-te-menu-frame')[0].contentDocument.getElementsByClassName('goog-te-menu2-item').length>1}catch(e){return false;}}],
+        title:""
+    },
     '989584' : {
         url:'https://www.delta.com/PCCOciWeb/DisplayTripSummaryNext.action',
         ua:'FirefoxDesktop',
@@ -1274,7 +1280,7 @@ var bugdata = {
         "url": "http://www.reuters.com/finance/stocks/OPERA.OL/key-developments/article/2833426",
         "ua": "FirefoxAndroid",
         "steps": [ /* If this page completes loading, the problem is fixed. Lovely and simple pass condition :) */
-            function(){return true}
+            function(){return document.title != 'Page Load Error'}
         ],
         "title": "redirect loop on Reuters page"
     },
