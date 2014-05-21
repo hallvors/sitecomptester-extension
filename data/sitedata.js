@@ -1203,8 +1203,8 @@ var bugdata = {
         "steps": [
             function(){},/* js sniffing needs some time to run - a dummy function for the first load */
             function(){ if(window.IsPC)return ! window.IsPC();  return hasViewportMeta() && location.hostname === "m.tieyou.com" && mobileLinkOrScriptUrl();}
-        ], 
-        "ua": "FirefoxOS", 
+        ],
+        "ua": "FirefoxOS",
         "title": "m.tieyou.com sends desktop site to Firefox OS"
     },
     "826338" : {
@@ -1265,7 +1265,7 @@ var bugdata = {
         "ua": "FirefoxOS",
         "steps": [
             function(){if(!document.querySelector('.entry p'))return 'delay-and-retry';return getComputedStyle(document.querySelector('.entry p')).wordBreak != 'break-word'}
-        ], 
+        ],
         "title": "Wired.com is not word wrapping properly for Firefox Android"
     },
     "964612": {
@@ -3052,7 +3052,8 @@ var automated_tests={
 	"884863" : {
 		url: 'http://mobile.reuters.com',
 		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}]
+		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}],
+        title: "reuters.com serves Desktop Content to FirefoxOS"
 	},
 	"878275" : {
 		url: 'http://mondo.rs',
@@ -3613,7 +3614,7 @@ var automated_tests={
 		steps:[function(){return location.hostname.indexOf("m.taobao.com")>-1 && hasViewportMeta()}]
 	},
 	"804716" : {
-		url: 'http://mobile.reuters.com/do/urlRedirect?URL=http%3A%2F%2Fwww.reuters.com/finance/stocks/OPERA.OL/key-developments/article/2388763?',
+		url: 'http://www.reuters.com/',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("mobile.reuters.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
