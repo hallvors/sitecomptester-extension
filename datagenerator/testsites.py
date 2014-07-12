@@ -1,27 +1,34 @@
 from marionette import Marionette
 import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse
 
-dirname = 'C:\\mozilla\\testing\\missing-2014-03-17\\'
+dirname = 'C:\\mozilla\\testing\\missing-2014-07-12\\'
+scriptdir = os.path.dirname(os.path.realpath(__file__))
 filename = dirname + 'sites.txt'
 start_at = 0
 run_until = None
 all_data = {}
 
 ignored_bugs = []
-for line in open(dirname+'..'+os.path.sep+'ignored_bugs.txt'):
+for line in open(scriptdir+'..'+os.path.sep+'ignored_bugs.txt'):
     if line[0] == '#':
         continue
     ignored_bugs.append(line.strip())
 parser = argparse.ArgumentParser(description=("Test a list of sites, make screenshots"))
 parser.add_argument("-i", dest='index', type=int, help="the index in the list of the site you want to test, 0-based", default=None)
+parser.add_argument("-s", dest='start_at', type=int, help="start at a certain index in list, 0-based", default=0)
 args = parser.parse_args()
 if args.index is not None:
     start_at = args.index
     run_until = args.index
+if args.start_at is not 0:
+    start_at = args.start_at
 
 if not os.path.exists(dirname+'comp'):
     os.mkdir(dirname+'comp')
 if not os.path.exists(dirname+'comp/.htaccess'):
+    # Screenshots and information lives on hallvord.com for now, so it needs to be CORS-friendly
+    # so that AWCY can reference everything - including JSON data. Write a .htaccess file setting
+    # CORS headers
     f = open(dirname+'comp/.htaccess', 'w')
     f.write("""Header add Access-Control-Allow-Origin "*"
 Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT\"""")
@@ -43,7 +50,7 @@ def set_mozilla_pref(marionette_instance, name, value):
     marionette_instance.set_context(marionette_instance.CONTEXT_CONTENT)
 
 def spoof_firefox_os():
-    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Mobile; rv:23.0) Gecko/23.0 Firefox/23.0')
+    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Mobile; rv:26.0) Gecko/26.0 Firefox/26.0')
     set_mozilla_pref(m, 'general.useragent.appName', 'Netscape')
     set_mozilla_pref(m, 'general.useragent.vendor', 'Mozilla')
     set_mozilla_pref(m, 'general.useragent.platform', '')
@@ -95,7 +102,7 @@ def read_json_file(path):
         data = json.loads(idx_f.read())
         idx_f.close()
     else:
-        data = {} 
+        data = {}
     return data
 
 def empty_firefox_cache(marionette_instance):
@@ -228,7 +235,7 @@ with open(filename, 'r') as handle:
                         'steps': ['noWapContentPlease'],
                         'testType':'xhr',
                         'title':parts[1]
-                    }                    
+                    }
                 else:
                     out_obj[parts[0]] = {
                         'url':url,
@@ -249,10 +256,10 @@ with open(filename, 'r') as handle:
         if os.path.exists(dirname+'wk-spoof-'+f) and os.path.exists(dirname+f) and os.path.exists("c:\\Program Files (x86)\\IrfanView"):
             ss_a = open(dirname+f, 'rb')
             ss_b = open(dirname+'wk-spoof-'+f, 'rb')
-            if diff_ratio(ss_a.read(), ss_b.read()) < 1.0:     
+            if diff_ratio(ss_a.read(), ss_b.read()) < 1.0:
                 subprocess.call(["c:\\Program Files (x86)\\IrfanView\\i_view32.exe", '/panorama=(1,%s%s,%swk-spoof-%s)' % (dirname,f,dirname,f), '/convert %scomp\\%s' % (dirname,f)], bufsize=100)
                 if run_until is None: # We only want to overwrite the index if we're not doing a "partial" run..
-                # 
+                #
                     if not tmp.subdomain in ['www', '']:
                         tmp = '%s.%s.%s' % (tmp.subdomain, tmp.domain, tmp.suffix)
                     else:
