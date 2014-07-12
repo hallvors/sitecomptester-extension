@@ -51,7 +51,7 @@
 "FirefoxAndroid" : {"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
 "general.platform.override":"",
-"general.useragent.override":"Mozilla/5.0 (Android; Mobile; rv:23.0) Gecko/23.0 Firefox/23.0",
+"general.useragent.override":"Mozilla/5.0 (Android; Mobile; rv:30.0) Gecko/30.0 Firefox/30.0",
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""},
 
