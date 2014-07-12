@@ -1,0 +1,87 @@
+# not compat
+933956
+# facebook bug, hard to test at the moment:
+953388
+# hard to test - wired.com fonts:
+723131
+# hangs Marionette - reported as 973792
+971436
+# just a demo, I don't care..
+754570
+# ignoreme - "causes no real problem"
+850827
+# URL makes no sense..
+812154
+# requires changing a pref, can't test
+970505
+# ads.. fickle stuff..
+960977
+# impossible to understand this problem .. for now :  [Buri][Browser][HTML5] Cannot play HTML 5 Game at http://h5.qq.com/
+846682
+# machine-readable whatnot, this machine isn't interested yet..
+969470
+# requires Google login working
+755590
+754754
+826712
+668275
+754697
+826504
+627155
+995140
+# req google login and is probably hopeless to test for anyway
+1007527
+# requires Facebook login working (for the first one, just check if autocomplete=off is set)
+877344
+# scientiamobile - url is forbidden now
+963732
+# login.yahoo sends desktop content to pretty much any mobile browser..
+944512
+# this "link" to an Android app is an ad, quite generic
+950170
+# requires stumbleupon login
+927024
+# requires getting XHR to work better..
+936454
+# play, then pause vimeo
+966919
+# some CMS - impacts other sites  but problem not seen on their own site
+974271
+# Minor Google l10n bug, testing requires figuring out how to load the right locale..
+976753
+# bug in ad that may or may not appear
+905860
+# requires loading some "app permission" screen, hard to get to
+980635
+# "investigate.." bug
+941076
+# needs to submit "register account" - form
+946406
+# We don't care much about this bug because we want the mobile version of the site anyway
+951412
+# read.amazon bug requires amazon login (and is under-defined anyway, mea culpa)
+964167
+# node.js lib
+914313
+# untestable - requires some touch/swipe stuff I haven't found a way to fake from JS..
+755800
+# can't be bothered, sorry Disney..
+987550
+# needs acct
+987429
+# likely a dup of that other one
+974861
+# testable only in .nl
+880742
+# I've forgotten why I dropped testing this, it was for a reason..
+924386
+# investigate..
+977370
+# some intent stuff, not testable from here
+859456
+# bah
+1004718
+# not sure if I see the problem..
+961987
+# meta bug, really
+1015045
