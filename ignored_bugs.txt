@@ -85,3 +85,5 @@
 961987
 # meta bug, really
 1015045
+# Sencha touch meta bug, no specific issue
+895485
