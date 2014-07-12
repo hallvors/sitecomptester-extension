@@ -11,6 +11,12 @@ var hosts = {};
 
 */
 var bugdata = {
+    '1035141' : {
+        url:'http://smart.mail.163.com',
+        ua:'FirefoxOS',
+        steps:[function(){}, function(){if(document.readyState !== 'complete')return 'delay-and-retry'; return location.hostname === 'smart.mail.163.com'}],
+        title:"smart.mail.163.com redirects Firefox OS to desktop login page"
+    },
     '976013' : {
         url:'http://people.mozilla.org/~atrain/mobile/tests/google-translate.html',
         ua:'FirefoxAndroid',
@@ -21,7 +27,8 @@ var bugdata = {
         url:'https://www.delta.com/PCCOciWeb/DisplayTripSummaryNext.action',
         ua:'FirefoxDesktop',
         steps:[function(){
-            var ver;for(let el,i=0;el=document.scripts[i];i++){
+            var ver;
+            for(var el,i=0;el=document.scripts[i];i++){
                 if(el.src.indexOf('?ver=')>-1)ver = el.src.substring(el.src.indexOf('?ver=')+5, el.src.length);
             }
             location = 'https://content.delta.com/content/dam/delta-applications/pcc/oci_'+ver.substr(0,6)+'/1/shared/jawr/js/ocibundle.js?ver='+ver;
@@ -111,7 +118,7 @@ var bugdata = {
         "url": "http://www.mobilefringeserver.com/mw/southcentre/index.html",
         "ua": "FirefoxAndroid",
         "steps": [
-            function(){return document.getElementsByClassName('ui-btn-text').length>1}
+            function(){var pass=true; try{var myPhotoSwipe = $("#Gallery a").photoSwipe({  });}catch(e){pass=false} return pass && document.getElementsByClassName('ui-btn-text').length>1}
         ],
         "title": "Southcentre Mall website doesn't work in Firefox"
     },
@@ -419,6 +426,7 @@ var bugdata = {
     "1008889": {
         "url": "http://state.gov",
         "steps": [
+            function(){},
             function(){return hasViewportMeta() && location.hostname === "m.state.gov" && mobileLinkOrScriptUrl();}
         ],
         "ua": "FirefoxOS",
@@ -1574,9 +1582,12 @@ var bugdata = {
     "957517": {
         "url": "http://smart.mail.163.com",
         "steps": [function(){}, /*js redirect on first page, wait for next load*/
-            function(){return hasViewportMeta() && location.hostname === "smart.mail.163.com";}
+            function(){
+                if(!document.getElementById('username'))return 'delay-and-retry';
+                return getComputedStyle(document.getElementById('username'), '').backgroundColor !== 'transparent' && getComputedStyle(document.getElementsByClassName('loginBtn')[0], '').backgroundColor !== 'transparent';
+            }
         ],
-        "ua": "FirefoxOS",
+        "ua": "FirefoxAndroid",
         "title": "smart.mail.163.com - some odd rendering on login page"
     },
     "878224" : {
@@ -1961,7 +1972,7 @@ var bugdata = {
     "935472" : {
 		url: 'http://blip.tv/commercialbreak/selling-out-colleen-ryan-6687803',
 		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/ && document.getElementsByTagName('video').length > 0}]
+		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/ && document.getElementById('PlayeriFrame')!==null}]
 	},
     /*'924386' : {
         url:'https://mobile.twitter.com/trutherbot',
@@ -1975,7 +1986,7 @@ var bugdata = {
     '868298' : {
         url:'http://www.bing.com/videos/search?q=cats&FORM=HDRSC3',
         ua:'FirefoxAndroid',
-        steps:[function(){return document.getElementsByClassName('vidr').length!=0}]
+        steps:[function(){return document.getElementsByClassName('vidthumb').length!=0}]
     },
     "913590" : {
 		url: 'http://www.lepoint.fr',
@@ -2314,7 +2325,11 @@ var bugdata = {
     '805660' : {
         url:'http://bradesco.com.br',
         ua:'FirefoxOS',
-        steps:[function(){return location.hostname.indexOf('bradescocelular.com.br')>-1;}]
+        steps:[ /* both HTTP and JS-driven redirects kick in here. Let's look for the sniffing .js file - before it loads,
+                there's no point in checking if it ran correctly */
+            function(){ if(location.hostname.indexOf('celular') === -1 && !mobileLinkOrScriptUrl('Mobile2Detect.js'))return 'delay-and-retry'; },
+            function(){return location.hostname.indexOf('bradescocelular.com.br')>-1;}
+        ]
     },
     '828418' : {
         url:'http://bbva.es',
@@ -2355,7 +2370,11 @@ var bugdata = {
     '890864' : {
         url:'http://www.mibebeyyo.com/',
         ua:'FirefoxOS',
-        steps:[function(){return document.getElementsByClassName('contenedormobile').length>0;}]
+        steps:[function(){ // site is now responsive! \o/
+            if(!document.body)return 'delay-and-retry';
+            return document.body.className.indexOf('homepage')>-1; // not sure if we should keep this test though..
+        }
+        ]
     },
     '888706' : {
         url:'http://m.plus.pl/',
@@ -2777,7 +2796,7 @@ var automated_tests={
 	"855450" : {
 		url: 'http://globovision.com',
 		 ua: "FirefoxOS",
-		steps:[function(){return hasHandheldFriendlyMeta() /*(regression test, expected to pass)*/ && mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
+		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
 	"805164" : {
 		url: 'http://google.com',
@@ -3050,10 +3069,10 @@ var automated_tests={
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
 	"884863" : {
-		url: 'http://mobile.reuters.com',
+		url: 'http://mobile.reuters.com/',
 		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}],
-        title: "reuters.com serves Desktop Content to FirefoxOS"
+		steps:[function(){return document.getElementsByTagName('nav').length>0;  mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}],
+        title: "mobile.reuters.com sends a low-fi mobile version to Firefox OS"
 	},
 	"878275" : {
 		url: 'http://mondo.rs',
@@ -3235,11 +3254,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"884863" : {
-		url: 'http://reuters.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta()}]
-	},
 	"828435" : {
 		url: 'http://rincondelvago.com',
 		 ua: "FirefoxOS",
@@ -3357,7 +3371,10 @@ var automated_tests={
 	"827630" : {
 		url: 'http://vagalume.com.br',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.vagalume.com.br")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[
+            function(){},
+            function(){return location.hostname.indexOf("m.vagalume.com.br")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}
+        ]
 	},
 	"878253" : {
 		url: 'http://vatera.hu',
@@ -3449,11 +3466,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta()}]
 	},
-	"860668" : {
-		url: 'http://www.huffingtonpost.co.uk/mobileweb/slideshow/3053015/291140/?icid=hp_uk-comedy_gallery',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
 	"828401" : {
 		url: 'http://www.ingdirect.es/',
 		 ua: "FirefoxOS",
@@ -3528,19 +3540,19 @@ var automated_tests={
      All the sniffing takes place on a /0,0.html URL so if we're still there it's too early to do the actual test..
     */
 	"828366" : {
-		url: 'http://wyborcza.biz',
+		url: 'http://wyborcza.biz/biznes/0,0.html',
 		 ua: "FirefoxOS",
 		steps:[
-            function(){ if(location.pathname === '/' || location.pathname.indexOf('/0,0') === 0)return 'delay-and-retry' },
-            function(){return location.hostname.indexOf("m.wyborcza.biz")>-1 && hasViewportMeta()}
+            function(){ if(location.pathname === '/' || (location.hostname.indexOf('m.') === -1 && location.pathname.indexOf('/0,0') === 0))return 'delay-and-retry' },
+            function(){if(location.hostname.indexOf("m.wyborcza.")>-1)return true;try{return 'isMobile '+ window.PianoMedia.isMobile()}catch(e){return 'delay-and-retry'} }
         ]
-	},
-	"828378" : {
-		url: 'http://wyborcza.pl',
-		 ua: "FirefoxOS",
-		steps:[
-            function(){ if(location.pathname === '/' || location.pathname.indexOf('/0,0') === 0)return 'delay-and-retry' },
-            function(){return location.hostname.indexOf("m.wyborcza.pl")>-1 && hasViewportMeta() /*(regression test, expected to pass)*/}
+    },
+    "828378" : {
+        url: 'http://wyborcza.pl',
+         ua: "FirefoxOS",
+        steps:[
+            function(){ if(location.pathname === '/' || (location.hostname.indexOf('m.') === -1 && location.pathname.indexOf('/0,0') === 0))return 'delay-and-retry' },
+            function(){if(location.hostname.indexOf("m.wyborcza.")>-1)return true;try{return 'isMobile '+ window.PianoMedia.isMobile()}catch(e){return 'delay-and-retry'} }
         ]
 	},
 	"878286" : {
@@ -3616,7 +3628,8 @@ var automated_tests={
 	"804716" : {
 		url: 'http://www.reuters.com/',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("mobile.reuters.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return location.hostname.indexOf("mobile.reuters.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}],
+        title: "reuters.com serves Desktop Content to FirefoxOS"
 	},
 	"743696" : {
 		url: 'http://m.comcast.net',
@@ -3886,9 +3899,9 @@ var automated_tests={
         "title": "airtickets.gr doesn't redirect to mobile site on Firefox OS"
     },
     "958708": {
-        "url": "http://wapc.mlb.com/play?c_id=mlb",
+        "url": "http://m.mlb.com/video",
         "steps": [
-            function(){return hasVideoTags();}
+            function(){return hasVideoTags() && document.getElementsByTagName('video')[0].outerHTML;}
         ],
         "ua": "FirefoxOS",
         "title": "m.mlb.com - issues with video playback in Fennec and B2G"
@@ -4140,9 +4153,9 @@ var automated_tests={
     "942247": {
         "url": "http://kennedyandoswald.com",
         "steps": [
-            function(){return hasViewportMeta() && hasVideoTags();}
+            function(){if(document.querySelectorAll('video,object').length===0) return 'delay-and-retry'; return hasVideoTags();}
         ],
-        "ua": "FirefoxOS",
+        "ua": "FirefoxAndroid",
         "title": "NatGeo Kennedy promo site blocks Firefox for Android for not having Flash"
     },
     "932846": {
