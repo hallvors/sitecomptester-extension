@@ -11,6 +11,15 @@ var hosts = {};
 
 */
 var bugdata = {
+    'webcompat-173' : {
+        url:'https://www.chase.com',
+        ua:'Opera21',
+        steps:[function(){
+            if(document.readyState != 'complete') return 'delay-and-retry';
+            return document.getElementById('unsecureBrowserMessage') === null || document.getElementById('unsecureBrowserMessage').style.display != 'block'
+        }],
+        title:"www.chase.com - Opera not a recommended browser"
+    },
     '1035141' : {
         url:'http://smart.mail.163.com',
         ua:'FirefoxOS',
