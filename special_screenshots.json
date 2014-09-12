@@ -1,0 +1,36 @@
+{
+    "mail.google.com": [
+        {"title":"Inbox screen", "url":"https://mail.google.com", "login_first":true},
+        {
+            "title":"Menu open",
+            "url":"https://mail.google.com",
+            "login_first":true,
+            "inject_js_before":"document.querySelector('div[aria-label=\"Menu\"], div[aria-label=\"Meny\"], a[href*=\"v=mnu\"]').click()",
+            "inject_js_after":"history.back()"
+        },
+        {
+            "title":"Compose message screen",
+            "url":"https://mail.google.com",
+            "login_first":true,
+            "inject_js_before":"document.querySelector('div[aria-label*=\"Write\"], div[aria-label*=\"Compose\"], div[aria-label*=\"Skriv\"], a[href*=\"&v=b&\"]').click()",
+            "inject_js_after":"history.back()"
+        }
+    ],
+
+    "linkedin.com":[
+        {
+            "title":"User profile (not logged in)",
+            "url":"https://www.linkedin.com/in/johnlilly"
+        },{
+            "title":"Main landing page after login",
+            "url": "https://linkedin.com",
+            "login_first":true
+        }
+    ],
+    "twitter.com":[
+        {"title":"Main page (not logged in)", "url":"https://twitter.com"},
+        {"title":"Main page (logged in)", "url":"https://twitter.com", "login_first":true},
+        {"title":"Connect page (logged in)", "url":"https://twitter.com/i/connect", "login_first":true}
+    ]
+
+}
