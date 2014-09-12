@@ -87,3 +87,5 @@
 1015045
 # Sencha touch meta bug, no specific issue
 895485
+# Flash site, not much point in checking if they sniff browsers when it's all Flash beyond the sniffing
+996435
