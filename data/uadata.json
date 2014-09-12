@@ -63,10 +63,17 @@
 "general.useragent.vendorSub":""},
 
 "Opera21" : {"general.appname.override":"Netscape",
-"general.appversion.override":"5.0 ()",
-"general.platform.override":"",
+"general.appversion.override":"5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36 OPR/21.0.1432.67",
+"general.platform.override":"Win32",
 "general.useragent.override":"Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.132 Safari/537.36 OPR/21.0.1432.67",
-"general.useragent.vendor":"",
+"general.useragent.vendor":"Opera Software ASA",
+"general.useragent.vendorSub":""},
+
+"OperaMini" : {"general.appname.override":"Opera",
+"general.appversion.override":"9.80 (J2ME/MIDP; Opera Mini/9.80 (J2ME/23.377; U; en) Presto/2.5.25 Version/10.54",
+"general.platform.override":"Win32",
+"general.useragent.override":"Opera/9.80 (J2ME/MIDP; Opera Mini/9.80 (J2ME/23.377; U; en) Presto/2.5.25 Version/10.54",
+"general.useragent.vendor":"Opera Software ASA",
 "general.useragent.vendorSub":""}
 
 }
