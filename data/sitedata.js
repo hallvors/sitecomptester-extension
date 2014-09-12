@@ -11,6 +11,15 @@ var hosts = {};
 
 */
 var bugdata = {
+    '990767' : {
+        url:'http://maps.google.com',
+        ua:'FirefoxOS',
+        steps:[function(){
+            if(!('gDeviceCapabilities' in window))return 'delay-and-retry';
+            return window.gDeviceCapabilities[1] === undefined;
+        }],
+        title:"[B2G][Browser]zooming in/out in google maps does not display properly"
+    },
     '1044422' : {
         url:'https://www.yahoo.com',
         ua:'FirefoxAndroid',
@@ -246,7 +255,7 @@ var bugdata = {
     "1036806": {
         "url": "http://www.clarin.com/",
         "steps": [
-            function(){return hasViewportMeta() && (location.hostname === "ios.clarin.com" || location.hostname === "android.clarin.com");}
+            function(){return hasViewportMeta();}
         ],
         "ua": "FirefoxOS",
         "title": "clarin.com serves desktop content to Firefox OS smartphones"
@@ -1805,10 +1814,10 @@ var bugdata = {
         "title": "realmobile.gr doesn't render properly on Firefox for Android"
     },
     "967043": {
-        "url": "http://51degrees.com/Products/DeviceData/UserAgentTester.aspx",
+        "url": "http://51degrees.com/Resources/UserAgentTester",
         "steps": [
             function(){document.querySelector('input[type="submit"]').click();},
-            function(){if(!document.body.textContent.match(/IsSmartPhone/))return 'delay-and-retry'; return document.body.textContent.match(/IsSmartPhone\s*True/) != null;}
+            function(){if(!document.body.textContent.match(/IsMobile/))return 'delay-and-retry'; return document.body.textContent.match(/IsSmartPhone\s*True/) != null;}
         ],
         "ua": "FirefoxOS",
         "title": "51degrees categorizes FxOS as is_smartphone = false"
@@ -3293,8 +3302,8 @@ var automated_tests={
 	},
 	"842184" : {
 		url: 'http://m.thestar.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() /*(regression test, expected to pass)*/ && hasViewportMeta() /*(regression test, expected to pass)*/}]
+		 ua: "FirefoxAndroid",
+		steps:[function(){return document.getElementsByName('mobile-web-app-capable').length>0}]
 	},
 	"827626" : {
 		url: 'http://magazineluiza.com.br',
@@ -3651,7 +3660,7 @@ var automated_tests={
 	"843162" : {
 		url: 'http://urbanspoon.com',
 		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return hasViewportMeta()}]
 	},
 	"827630" : {
 		url: 'http://vagalume.com.br',
@@ -3724,7 +3733,7 @@ var automated_tests={
 	"848854" : {
 		url: 'http://www.deadline.com/',
 		 ua: "FirefoxOS",
-		steps:[function(){}, function(){return location.hostname === 'm.deadline.com'}]
+		steps:[function(){}, function(){return document.body.classList.contains('pmc-mobile');}]
 	},
 	"828403" : {
 		url: 'http://www.fotocasa.es/',
@@ -3804,7 +3813,7 @@ var automated_tests={
 	"843162" : {
 		url: 'http://www.urbanspoon.com/',
 		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return hasViewportMeta()}]
 	},
 	"878655" : {
 		url: 'http://www.vesti-online.com/',
@@ -3986,7 +3995,7 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-    "757247" : {
+    "webcompat.com/325" : {
 		url: 'http://m.wat.tv',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.wat.tv")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
@@ -4052,7 +4061,7 @@ var automated_tests={
 	"935913" : {
 		url: 'http://desktopvideo.about.com/od/watchingonlinevideo/a/watchonline.htm',
 		 ua: "FirefoxOS",
-		steps:[function(){return hasHandheldFriendlyMeta() && mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
 	"888733" : {
 		url: 'http://www.crunchyroll.com/',
@@ -5311,7 +5320,7 @@ var automated_tests={
     "964577": {
         "url": "http://www.eurosport.fr/",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.eurosport.fr" && mobileLinkOrScriptUrl();}
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
         ],
         "ua": "FirefoxOS",
         "title": "www.eurosport.fr sends desktop site to Firefox OS"
@@ -5327,7 +5336,7 @@ var automated_tests={
     "964575": {
         "url": "http://www.credit-agricole.fr/",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "ca-mobile.com";}
+            function(){return hasViewportMeta() && document.getElementById('cssmobile') != null;}
         ],
         "ua": "FirefoxOS",
         "title": "www.credit-agricole.fr sends desktop site to Firefox OS"
@@ -5471,7 +5480,7 @@ var automated_tests={
     "964565": {
         "url": "http://www.leparisien.fr/",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.leparisien.fr" && hasMobileOptimizedMeta() && hasHandheldFriendlyMeta();}
+            function(){if('mobile_url' in window) return 'delay-and-retry' /*pre-js-redirect, let's wait..*/; return hasViewportMeta() && location.hostname === "m.leparisien.fr" && hasMobileOptimizedMeta() && hasHandheldFriendlyMeta();}
         ],
         "ua": "FirefoxOS",
         "title": "www.leparisien.fr sends desktop site to Firefox OS"
@@ -5620,7 +5629,7 @@ var automated_tests={
         "steps": [
             function(){return hasViewportMeta();}
         ],
-        "ua": "FirefoxOS",
+        "ua": "FirefoxAndroid",
         "title": "www.ocn.ne.jp does not work correctly in Firefox Android"
     },
     "961025": {
