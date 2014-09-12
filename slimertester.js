@@ -5,12 +5,12 @@ var date = new Date();
 var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
 var results=[];
 var uadata = require('data/uadata.json');
-var ua;
+var ua, consoleMessages = [];
 var page = createPage();
 
 var runSpecificBugTest = null;
 if(phantom.args.length > 0){
-	console.log('Will run tests for bugs '+phantom.args)
+	if(phantom.args.length > 1)console.log('Will run tests for bugs '+phantom.args)
 	runSpecificBugTest = phantom.args; // we can pass in a bug number on the command line to run that test only..
 }
 
@@ -64,7 +64,7 @@ function nextBug () {
 		console.log('Done. Results were written to '+outfile)
 	}else if (bugdata[bug]) {
 		ua = page.settings.userAgent = uadata[bugdata[bug].ua]['general.useragent.override'];
-		console.log('Will test '+bug)
+		console.log('Will test '+bug+', set userAgent to ' + ua)
 		if (bugdata[bug].testType === 'xhr') {
 			page.close();
 			page = createPage();
@@ -80,6 +80,7 @@ function nextBug () {
 }
 
 function loadSite(){
+	consoleMessages = []; // per-site, clear them before loading the next one
 	jobTime(function(){
 		console.log('TIMEOUT! for '+bug);
 		if (page.url.indexOf(bugdata[bug].url)>-1) { // we're not done loading, but let's try to run those tests anyway..
@@ -89,6 +90,7 @@ function loadSite(){
 			nextBug();
 		}
 	}, 60000); // backup timeout in case we get stuck at some point..
+	console.log('Now opening '+bugdata[bug].url)
 	page.open(bugdata[bug].url, function (status) {
 		if(status == 'success'){
 			//console.log('success for '+page.url);
@@ -114,6 +116,8 @@ var retryCount=0
 function runTestStep () {
 	jobTime(nextBug, 30000); // backup timeout in case we get stuck at some point..
 	if(xhrTestUrl)return; // handled elsewhere..
+	if(page.title === 'Page Load Error')return registerTestResult(false); // assume failure for loading errors (and fail early because
+		//sometimes we're not allowed to inject JS into the error document)
 	if (page.evaluateJavaScript('typeof hasViewportMeta === "function"')) {
 		if (bugdata[bug] && bugdata[bug].steps.length>currentTest) {
 			try{
@@ -124,9 +128,9 @@ function runTestStep () {
 				//console.log('result now '+result)
 				if(/^EXCEPTION:/.test(result))throw result;
 				if(result == 'delay-and-retry'){
-					if(retryCount<5){
-						jobTime(runTestStep, 1500);
-						console.log('scheduling new attempt, page is not ready.. '+retryCount+'/5');
+					if(retryCount<10){
+						jobTime(runTestStep, 2500);
+						console.log('scheduling new attempt, page is not ready.. '+retryCount+'/10');
 						retryCount++
 						return;
 					}else{
@@ -163,8 +167,10 @@ function runTestStep () {
     }
 
 function registerTestResult (result, comment) {
-	console.log(bug+' result: '+result+' '+(bugdata[bug].title||'')+' '+(comment||''));
-	results.push([bug, datetime(), ua, result, bugdata[bug].title, comment]);
+	if(bugdata[bug]){
+		console.log(bug+' result: '+result+' '+(bugdata[bug].title||'')+' '+(comment||''));
+		results.push([bug, datetime(), ua, result, bugdata[bug].title, comment]);
+	}
 	writeResultsToFile();
 }
 
@@ -175,7 +181,7 @@ function writeResultsToFile(){
         for(var i=0; i<results.length; i++){
             csvStr+='"'+(results[i].join('","'))+'"';
             csvStr+='\n';
-        }  
+        }
     }
     var fs = require('fs');
     var f = fs.open(outfile, 'w');
@@ -187,6 +193,7 @@ function writeResultsToFile(){
     }
 }
 function injectJS(page, ua){
+	if(page.title === 'Page Load Error')return;
 	try{
 		//SlimerJS or Gecko has a bug where navigator.userAgent doesn't actually reflect the HTTP UA header..
 	    page.evaluateJavaScript('navigator.__defineGetter__("userAgent", function(){return "' + ua + '"})');
@@ -200,7 +207,9 @@ function injectJS(page, ua){
 	        //console.log('injecting: '+bugdata[bug].injectScript)
 	        page.evaluateJavaScript(bugdata[bug].injectScript);
 	    }
-	}catch(e){console.log(e);}
+	}catch(e){
+		//console.log(e);
+	}
 
 }
 
@@ -215,18 +224,23 @@ function createPage(){
 	"Connection": "keep-alive"
 	};
 	page.viewportSize = { width:360, height:525 };
-	page.onResourceRequested = function (req) {
+	page.onInitialized = function (req) {
 		injectJS(page, ua);
 	};
+	page.onError = function(msg, line, source){
+		console.log('ERROR reported to slimertester.js: '+msg+' '+line+' '+source);
+		console.log(JSON.stringify(line));
+		consoleMessages.push(msg);
+	}
 
 	page.onResourceError = function (res) {
-		var desc = 'received: '+res.url+'\n '+res.contentType;
+		var desc = 'resource error - received: '+res.url+'\n '+res.contentType;
 	    console.log('received: ' + desc);
 	}
 	page.onResourceReceived = function (res) {
 		if(res.status == 301 || res.status == 302)return; // this is just an intermediate redirect response, wait for the real deal
 	    //console.log(JSON.stringify(res, null, 4))
-	    injectJS(page, ua);
+	    //injectJS(page, ua);
 	    var result;
 		if(/application\/vnd\.wap(\.xhtml\+xml|\.wml|)/i.test(res.contentType)){
 			console.log('WAP! FAILURE!')
@@ -240,7 +254,7 @@ function createPage(){
 			}else{
 				var obj = {text: res.body, headers:{}}
 				for(var i in res.headers)obj.headers[res.headers[i].name] = res.headers[i].value;
-				console.log(JSON.stringify(obj, null,2))				
+				console.log(JSON.stringify(obj, null,2))
 				result = bugdata[bug].steps[0](obj); // typically calls noWapContentPlease ..
 			}
 			registerTestResult(result, 'header check complete');
@@ -250,7 +264,7 @@ function createPage(){
 
 	page.onLoadFinished = function (status, url, isFrame) {
 		console.log('onLoadFinished '+status+' '+url+' '+isFrame);
-		
+
 		if(xhrTestUrl){
 			if(page.content === '<html><head></head><body></body></html>'){
 				// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
@@ -259,6 +273,7 @@ function createPage(){
 			}else{
 				//console.log(page.content)
 				registerTestResult(true, 'no WAP here, right?!');
+				xhrTestUrl = '';
 				// if next page is XHR, loading appears to fail *and* we'd see the source of the previous page.. Hence, load about:blank first
 				page.open('about:blank');
 				jobTime(nextBug, 10);
