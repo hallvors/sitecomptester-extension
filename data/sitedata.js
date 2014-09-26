@@ -11,6 +11,380 @@ var hosts = {};
 
 */
 var bugdata = {
+    "1050504": {
+        "url": "https://stacksocial.com/",
+        "steps": [
+            function(){return document.getElementsByClassName('carrousel').length === 0 || document.getElementsByClassName('carrousel')[0].scrollWidth <= screen.width;}
+        ],
+        "ua": "FirefoxOS",
+        "title": "stacksocial.com sends pop up larger than the viewport to Firefox OS"
+    },
+    "1043342": {
+        "url": "http://www.jeuxvideo.fr/",
+        "steps": [
+            function(){return location.hostname === "mobile.jeuxvideo.fr" && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "jeuxvideo.fr is sending desktop content to Firefox OS"
+    },
+    "1041478": {
+        "url": "http://clubic.com",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "mobile.clubic.com";}
+        ],
+        "ua": "FirefoxOS",
+        "title": "clubic.com is sending desktop content to Firefox OS"
+    },
+    "1057114": {
+        "url": "http://www.oglobo.globo.com",
+        "steps": [
+            function(){return location.hostname === "m.oglobo.globo.com" && hasMobileOptimizedMeta() && hasHandheldFriendlyMeta();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "Navigating to oglobo.globo.com does not direct user to m.oglobo.globo.com"
+    },
+    "1043744": {
+        "url": "http://www.chicagotribune.com/",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "my.chicagotribune.com" && hasMobileOptimizedMeta() && hasHandheldFriendlyMeta();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "chicagotribune.com sends users to desktop content on Firefox Android and Firefox OS smartphones"
+    },
+    "1041606": {
+        "url": "http://abc.es",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.abc.es" && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "abc.es sends desktop site to Firefox OS"
+    },
+    "386170": {
+        "url": "http://www.westjet.com/",
+        "steps": [
+            function(){return hasViewportMeta() && location.pathname.indexOf('mobile/')>-1;}
+        ],
+        "ua": "FirefoxOS",
+        "title": "westjet.com - Site Sniffs for Firefox, Fails in Varying Degrees in Other Gecko Browsers"
+    },
+    "881485": {
+        "url": "https://www.apple.com/apple-events/june-2013/",
+        "steps": [
+        ],
+        "ua": "FirefoxOS",
+        "title": "https://www.apple.com/apple-events/june-2013/ does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "879081": {
+        "url": "https://support.us.playstation.com/app/answers/detail/a_id/1488/kw/safe%20mode",
+        "steps": [
+        ],
+        "ua": "FirefoxOS",
+        "title": "https://support.us.playstation.com/ does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "877754": {
+        "url": "https://www.dell.com",
+        "steps": [
+        ],
+        "ua": "FirefoxOS",
+        "title": "https://www.dell.com/ does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "877756": {
+        "url": "https://www.ning.com",
+        "steps": [
+        ],
+        "ua": "FirefoxDesktop",
+        "title": "ning.com does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "1060137": {
+        "url": "http://www.libero.it/",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.libero.it" && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "b2g connects to virgilio.it instead of mobile.virgilio.it"
+    },
+    "1019179": {
+        "url": "http://cnni.com",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "edition.cnn.com";}
+        ],
+        "ua": "FirefoxOS",
+        "title": "cnni.com sends desktop site to Firefox OS and Firefox on Android"
+    },
+    "1041650": {
+        "url": "http://bbva.es",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "www.bbva.mobi" && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "bbva.es sends desktop site to Firefox OS"
+    },
+    "1061031": {
+        "url": "http://www.pickupforum.de/",
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "pickupforum.de sends desktop content instead of mobile content to Firefox Android"
+    },
+    "1052183": {
+        "url": "http://www.aa.com/",
+        "steps": [
+            function(){return location.hostname === "mobile.aa.com" && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "aa.com serves desktop content to Firefox OS"
+    },
+    "1045167": {
+        "url": "http://www.cajamar.es/",
+        "steps": [
+            function(){return hasViewportMeta() && hasMobileOptimizedMeta();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "cajamar.es doesn\u00b4t redirect to mobile site"
+    },
+    "1045169": {
+        "url": "http://www.anyoption.com/",
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "anyoption.com doesn't redirect to mobile site on Firefox OS"
+    },
+    "1019648": {
+        "url": "http://cinepolis.com.mx",
+        "steps": [
+            function(){return hasVideoTags() && location.hostname === "www.cinepolis.com.mx";}
+        ],
+        "ua": "FirefoxOS",
+        "title": "cinepolis.com.mx sends desktop site to Firefox OS"
+    },
+    "877761": {
+        "url": "https://www.cmbchina.com",
+        "steps": [
+        ],
+        "ua": "FirefoxOS",
+        "title": "https://www.cmbchina.com/ does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "877406": {
+        "url": "https://espn.go.com",
+        "steps": [
+        ],
+        "ua": "FirefoxOS",
+        "title": "https://espn.go.com/  does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "1042018": {
+        "url": "http://www.nextinpact.com/",
+        "steps": [
+            function(){return location.hostname === "m.nextinpact.com";}
+        ],
+        "ua": "FirefoxOS",
+        "title": "www.nextinpact.com is sending desktop content to Firefox OS"
+    },
+    "765214": {
+        "url": "https://onedrive.live.com/redir?resid=FB24CDE01BC02250!564&authkey=!ADhOW6fMV_dF0cw&ithint=file%2cpdf",
+        "steps": [
+            function(){return location.href.indexOf('WordPdf')>-1;}
+        ],
+        "ua": "FirefoxDesktop",
+        "title": "Microsoft SkyDrive complains about the lack of Adobe Reader when trying to open the PDF and PDF.js is installed and enabled"
+    },
+    "1015675": {
+        "url": "http://espn.go.com",
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl() && hasHandheldFriendlyMeta();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "ESPN sends Firefox OS a very simple mobile site, lacks video content among other features"
+    },
+    "1013702": {
+        "url": "https://www.google.com/?tbm=pts#q=ininventor:%22Christopher+R+Hulls%22&tbm=pts",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return document.getElementsByName('q')[0].value !== '';}
+        ],
+        "title": "Google: Patent search will not work on mobile (phones)"
+    },
+    "957701": {
+        "url": "http://m.nydailynews.com/new-york",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return location.hostname === 'm.nydailynews.com';}
+        ],
+        "title": "[B2G][Browser] nydailynews.com serves desktop site to b2g (which can result in tab crashing)"
+    },
+    "142195": {
+        "url": "http://www.rehobothaquatics.com/",
+        "ua": "FirefoxDesktop",
+        "steps": [
+            function(){
+                var fixed = true;
+                try{dynAnimation();}catch(e){fixed = false;}
+                return fixed;
+            }
+        ],
+        "title": "rehobothaquatics.com - Pages display full black"
+    },
+    "858943": {
+        "url": "http://www.transporteenlinea.com/",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return  document.getElementById('site_content').childNodes.length > 1;}
+        ],
+        "title": "[contacted][mootools] The browsers is unable to display the web page that uses google maps, but it is a valid page."
+    },
+    "1018050": {
+        "url": "http://www.freearabicdictionary.com/",
+        "ua": "FirefoxDesktop",
+        "steps": [
+            /* Interestingly, if we go directly to http://www.freearabicdictionary.com/dictionary/search/%D8%B4%D9%8E%D8%AC%D9%8E%D8%B1%D9%8E%D8%A9 it works
+                To see the bug, we have to submit the form..?!
+            */
+            function(){
+                document.getElementById('word').value='شَجَرَة';
+                document.getElementsByName('submit')[0].click();
+            },
+            function(){
+                if(location.href.indexOf('dictionary/search')<0)return 'delay-and-retry';
+                return document.title.match(/[\u0600-\u06ff]+/)?true:false;
+            }
+        ],
+        "title": "PHP errors in comments push character encoding declaration beyond the first 1024 bytes when searching on freearabicdictionary.com"
+    },
+    "1007955": {
+        "url": "https://mustang.ford.eu/#/en-GB",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return document.getElementById('mob-nav')!=null}
+        ],
+        "title": "Ford.com sends desktop site to Firefox OS"
+    },
+    "1013931": {
+        "url": "https://www.fedex.com/insight/findit/nrp.jsp?tracknumbers=575791242545&opco=FX&language=en&clienttype=ivother",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return document.body.hasAttribute('portrait')}
+        ],
+        "title": "Fedex.com doesn't recognize Firefox Android and Firefox OS UAs as mobile"
+    },
+    "888940": {
+        "url": "https://www.myvideo.de",
+        "ua": "FirefoxDesktop",
+        "steps": [],
+        "title": "http://www.myvideo.de does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "881786": {
+        "url": "http://www.bestwestern.com/",
+        "steps": [
+            function(){}
+        ],
+        "ua": "FirefoxDesktop",
+        "title": "Logging in on bestwestern.com does not work properly because of mixed content blocking",
+        "testType":"mixed-content-blocking"
+    },
+    "wc337": { // http://webcompat.com/issues/337
+        "url": "http://www.bestwestern.com/",
+        "steps": [
+            function(){return location.hostname === "m.bestwestern.com";}
+        ],
+        "ua": "FirefoxOS",
+        "title": "Firefox OS gets desktop content on bestwestern.com"
+    },
+    "1056971": {
+        "url": "http://www.jw.org/en/video-why-study-the-bible/",
+        "steps": [
+            function(){return hasVideoTags();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "JWPlayer fails to either feature detect properly or properly load video in mobile UAs on jw.org"
+    },
+    "984675": {
+        "url": "http://primarycolors.net/",
+        "steps": [
+            function(){return document.getElementById('alert')==null;}
+        ],
+        "ua": "FirefoxDesktop",
+        "title": "http://primarycolors.net/ claims SVG not supported, recommends Safari/Chrome"
+    },
+    "1057221": {
+        "url": "http://mixi.jp/",
+        "steps": [
+            function(){
+                if(!document.querySelector('.listStyle01 div.img'))return 'N/A';
+                return getComputedStyle(document.querySelector('.listStyle01 div.img')).display!='block';}
+        ],
+        /* neither FxOS nor FxAndroid gets this mobile version yet. */
+        "ua": "iPhone",
+        "title": "mixi.jp Mobile version is using the old-old CSS webkit flexbox syntax"
+    },
+    "508484": {
+        "url": "http://ukraine.usembassy.gov/",
+        "steps": [
+            function(){
+              var lis = document.getElementsByClassName('cycle')[0].getElementsByTagName('li');
+              for(var i=0;i<lis.length;i++){
+                if(lis[i].style.position === 'absolute' && lis[i].style.display === 'none')return true;
+              }
+              return false;}
+        ],
+        "ua": "FirefoxDesktop",
+        "title": "ukraine.usembassy.gov - Carrousel is not working at all"
+    },
+    "1040983": {
+        "url": "https://touch.www.linkedin.com/",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "touch.www.linkedin.com" && hasMobileOptimizedMeta() && hasHandheldFriendlyMeta();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "[B2G][Browser] When linking Google mail to LinkedIn, the browser does not transition to the Google sign in page"
+    },
+    "902531": {
+        "url": "http://play.google.com/music/listen",
+        "steps": [
+            function(){return hasViewportMeta();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "Google Play Music not working on Firefox for Android/Firefox OS"
+    },
+    "1041606": {
+        "url": "http://abc.es",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.abc.es" && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "abc.es sends desktop site to Firefox OS"
+    },
+    "1057114": {
+        "url": "http://www.oglobo.globo.com",
+        "steps": [
+            function(){return location.hostname === "m.oglobo.globo.com" && hasMobileOptimizedMeta() && hasHandheldFriendlyMeta();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "Navigating to oglobo.globo.com does not direct user to m.oglobo.globo.com"
+    },
+    "1042018": {
+        "url": "http://www.nextinpact.com/",
+        "steps": [
+            function(){return location.hostname === "m.nextinpact.com";}
+        ],
+        "ua": "FirefoxOS",
+        "title": "www.nextinpact.com is sending desktop content to Firefox OS"
+    },
+    "1041650": {
+        "url": "http://bbva.es",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "www.bbva.mobi" && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "bbva.es sends desktop site to Firefox OS"
+    },
     '990767' : {
         url:'http://maps.google.com',
         ua:'FirefoxOS',
@@ -29,7 +403,9 @@ var bugdata = {
             tmp.id = 'Stencil';
             tmp = tmp.appendChild(document.createElement('div'));
             tmp.className = 'fx-slidein';
-            return getComputedStyle(tmp,'').position !== 'fixed';
+            var pos = getComputedStyle(tmp,'').position;
+            tmp.parentNode.parentNode.removeChild(tmp.parentNode);
+            return document.getElementsByClassName('fx-slidein').length == 0 || pos !== 'fixed';
         }],
         title:"Can't scroll articles on yahoo.com"
     },
@@ -812,7 +1188,7 @@ var bugdata = {
     },
     "993143": {
         "url": "https://my.yahoo.com",
-        "ua": "FirefoxOS",
+        "ua": "FirefoxAndroid",
         "steps": [
             function(){return location.href.indexOf('login.yahoo.com/m')>-1}
         ],
@@ -1704,11 +2080,11 @@ var bugdata = {
     },
     "921532": {
         "url": "http://images.google.com/search?q=Lira&tbm=isch#",
-        "ua": "FirefoxAndroid",
+        "ua": "FirefoxOS",
         "steps": [
-            function(){return document.getElementById('mnav')===null}
+            function(){return document.getElementsByClassName('navend').length === 0;}
         ],
-        "title": "Google images on Firefox Android doesn't load images as you scroll"
+        "title": "Google images on Firefox OS doesn't load images as you scroll"
     },
     "960851": {
         "url": "http://www.sponichi.co.jp",
@@ -2642,16 +3018,16 @@ var bugdata = {
         testType : 'xhr'
     },
     '857119' : {
-        url: 'http://m.photobucket.com/images/?searchTerm=black+and+white',
+        url: 'http://photobucket.com/images/black%20and%20white?page=1',
         ua: 'FirefoxOS',
         /* we expect more than 10 images on a smartish phone.. */
 		steps: [ function(){ return document.images.length>=10 } ]
     },
     '729556' : {
-        url:'http://m.photobucket.com/',
+        url:'http://photobucket.com/',
         ua: 'FirefoxOS',
         /* this test is no longer directly testing the issue, because the page is redesigned.. */
-        steps: [function(){ return document.body.id === 'mobilehomepage';}]
+        steps: [function(){ return document.body.classList.contains('mobile');}]
     },
     '759111' : {
         url:'http://www.live.com/',
@@ -3582,9 +3958,10 @@ var automated_tests={
 		url: 'http://wap.sogou.com/pic/download.jsp?keyword=panda&index=1&v=5&amp;uID=7I-vsrDhj-2b7ngb#!id=2527ddb06ff1128f-27dc0329ebc9a017-129c8f03e0c1c95fe2e7fb649375c84f&index=1',
 		 ua: "FirefoxAndroid",
 		steps:[function(){
-            var oldMarkup = document.getElementById('imglist').innerHTML;
-            document.getElementById('next-a').click();
-            var passed = oldMarkup != document.getElementById('imglist').innerHTML;
+            var passed = true;
+            for(var i=0,s; s=document.scripts[i]; i++){
+                if(s.textContent.match(/var\s*touchStart\s*=\s*function\(\)\{\s*topCurX\s*=\s*event\.touches\[0\]\.screenX/i))passed = false;
+            }
             return passed;}]
 	},
 	"828360" : {
@@ -3645,7 +4022,8 @@ var automated_tests={
 	"709241" : {
 		url: 'https://mobile.twitter.com',
 		 ua: "FirefoxAndroid",
-		steps:[function(){},function(){return document.getElementById('launchdata') !== null}]
+         /* The "feature phone" version of Twitter does not currently have data- attributes on <BODY> while the smartphone one has */
+		steps:[function(){},function(){return Object.keys(document.body.dataset).length>0;}]
 	},
 	"843178" : {
 		url: 'http://txt2nite.com',
@@ -4885,7 +5263,7 @@ var automated_tests={
     "843126": {
         "url": "http://es.playstation.com/",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.es.playstation.com";}
+            function(){return hasViewportMeta();}
         ],
         "ua": "FirefoxOS",
         "title": "es.playstation.com doesn't recognize B2G or Fennec UAs as mobile"
@@ -4947,12 +5325,12 @@ var automated_tests={
         "title": "carwale.com isn't redirecting to mobile site on Firefox OS"
     },
     "888726": {
-        "url": "http://m.blinkx.com",
+        "url": "http://blinkx.com",
         "steps": [
             function(){return mobileLinkOrScriptUrl();}
         ],
         "ua": "FirefoxOS",
-        "title": "m.blinkx.com can\u2019t play a video"
+        "title": "blinkx.com can't play a video"
     },
     "945943": {
         "url": "http://www.groupon.com/",

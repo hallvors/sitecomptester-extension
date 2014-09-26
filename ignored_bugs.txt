@@ -89,3 +89,7 @@
 895485
 # Flash site, not much point in checking if they sniff browsers when it's all Flash beyond the sniffing
 996435
+# WFM
+960850
+# this requires login to some odd system..
+965050
