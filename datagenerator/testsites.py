@@ -2,7 +2,7 @@ from marionette import Marionette
 import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse, glob
 import pdb
 
-dirname = 'C:\\mozilla\\testing\\mbdtest\\'
+dirname = 'C:\\mozilla\\testing\\missing-2014-09-16\\'
 scriptdir = os.path.dirname(os.path.realpath(__file__)) + os.path.sep
 filename = dirname + 'sites.txt'
 start_at = 0
@@ -360,7 +360,7 @@ with open(filename, 'r') as handle:
         print str(i) + ' : ' + url
         if has_bug_data and hostname in all_data and len(all_data[hostname]) > 0: # we have some test data stored from earlier, we might use them..
             compsteps = all_data[hostname]
-        elif False:
+        else:
             try:
                 empty_firefox_cache(m)
                 spoof_firefox_os()
