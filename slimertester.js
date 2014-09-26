@@ -7,7 +7,7 @@ var results=[];
 var uadata = require('data/uadata.json');
 var ua, consoleMessages = [];
 var page = createPage();
-
+var hasHttpResources=false;
 var runSpecificBugTest = null;
 if(phantom.args.length > 0){
 	if(phantom.args.length > 1)console.log('Will run tests for bugs '+phantom.args)
@@ -81,6 +81,7 @@ function nextBug () {
 
 function loadSite(){
 	consoleMessages = []; // per-site, clear them before loading the next one
+	hasHttpResources = false; // also per-site
 	jobTime(function(){
 		console.log('TIMEOUT! for '+bug);
 		if (page.url.indexOf(bugdata[bug].url)>-1) { // we're not done loading, but let's try to run those tests anyway..
@@ -93,11 +94,16 @@ function loadSite(){
 	console.log('Now opening '+bugdata[bug].url)
 	page.open(bugdata[bug].url, function (status) {
 		if(status == 'success'){
-			//console.log('success for '+page.url);
+			console.log('success for '+page.url);
 			if(!xhrTestUrl){
-				page.includeJs(testsFile, function(){
-					jobTime(runTestStep, 100);
-				});
+				if(bugdata[bug].testType === 'mixed-content-blocking'){
+					registerTestResult(!hasHttpResources, 'http: resources loading');
+					nextBug();
+				}else{
+					page.includeJs(testsFile, function(){
+						jobTime(runTestStep, 100);
+					});
+				}
 			}
 		}else{
 			console.log(page.url)
@@ -115,7 +121,7 @@ function loadSite(){
 var retryCount=0
 function runTestStep () {
 	jobTime(nextBug, 30000); // backup timeout in case we get stuck at some point..
-	if(xhrTestUrl)return; // handled elsewhere..
+	if(xhrTestUrl || bugdata[bug].testType === 'mixed-content-blocking')return; // handled elsewhere..
 	if(page.title === 'Page Load Error')return registerTestResult(false); // assume failure for loading errors (and fail early because
 		//sometimes we're not allowed to inject JS into the error document)
 	if (page.evaluateJavaScript('typeof hasViewportMeta === "function"')) {
@@ -236,6 +242,10 @@ function createPage(){
 	page.onResourceError = function (res) {
 		var desc = 'resource error - received: '+res.url+'\n '+res.contentType;
 	    console.log('received: ' + desc);
+	    if(/http:\/\//.test(res.url)){
+	    	//console.log('HTTP URL! '+res.url);
+			hasHttpResources = true;
+		}
 	}
 	page.onResourceReceived = function (res) {
 		if(res.status == 301 || res.status == 302)return; // this is just an intermediate redirect response, wait for the real deal
@@ -259,6 +269,9 @@ function createPage(){
 			}
 			registerTestResult(result, 'header check complete');
 			jobTime(nextBug, 10);
+		}else if(/http:\/\//.test(res.url)){
+			hasHttpResources = true;
+	    	//console.log('HTTP URL! '+res.url);
 		}
 	};
 
