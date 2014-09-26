@@ -71,7 +71,7 @@ var bugdata = {
         "url": "https://www.apple.com/apple-events/june-2013/",
         "steps": [
         ],
-        "ua": "FirefoxOS",
+        "ua": "FirefoxDesktop",
         "title": "https://www.apple.com/apple-events/june-2013/ does not work properly because of mixed content blocking",
         "testType": "mixed-content-blocking"
     },
@@ -79,7 +79,7 @@ var bugdata = {
         "url": "https://support.us.playstation.com/app/answers/detail/a_id/1488/kw/safe%20mode",
         "steps": [
         ],
-        "ua": "FirefoxOS",
+        "ua": "FirefoxDesktop",
         "title": "https://support.us.playstation.com/ does not work properly because of mixed content blocking",
         "testType": "mixed-content-blocking"
     },
@@ -87,7 +87,7 @@ var bugdata = {
         "url": "https://www.dell.com",
         "steps": [
         ],
-        "ua": "FirefoxOS",
+        "ua": "FirefoxDesktop",
         "title": "https://www.dell.com/ does not work properly because of mixed content blocking",
         "testType": "mixed-content-blocking"
     },
@@ -167,7 +167,7 @@ var bugdata = {
         "url": "https://www.cmbchina.com",
         "steps": [
         ],
-        "ua": "FirefoxOS",
+        "ua": "FirefoxDesktop",
         "title": "https://www.cmbchina.com/ does not work properly because of mixed content blocking",
         "testType": "mixed-content-blocking"
     },
@@ -175,7 +175,7 @@ var bugdata = {
         "url": "https://espn.go.com",
         "steps": [
         ],
-        "ua": "FirefoxOS",
+        "ua": "FirefoxDesktop",
         "title": "https://espn.go.com/  does not work properly because of mixed content blocking",
         "testType": "mixed-content-blocking"
     },
@@ -281,9 +281,8 @@ var bugdata = {
         "testType": "mixed-content-blocking"
     },
     "881786": {
-        "url": "http://www.bestwestern.com/",
+        "url": "https://www.bestwestern.com/",
         "steps": [
-            function(){}
         ],
         "ua": "FirefoxDesktop",
         "title": "Logging in on bestwestern.com does not work properly because of mixed content blocking",
