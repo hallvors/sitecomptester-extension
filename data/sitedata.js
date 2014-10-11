@@ -11,6 +11,186 @@ var hosts = {};
 
 */
 var bugdata = {
+    "877443": {
+        "url": "https://inbox.com",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return }
+        ],
+        "title": "https://inbox.com/ does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "877736": {
+        "url": "https://www.samsung.com/no/home",
+        "ua": "FirefoxDesktop",
+        "steps": [
+            function(){return }
+        ],
+        "title": "https://www.samsung.com/ generates errors because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "892810": {
+        "url": "https://www.mturk.com/mturk/preview?groupId=2HGWQIHPCGJ2UXCY1JWXN0JPXYN71Q",
+        "ua": "FirefoxOS",
+        "steps": [
+        ],
+        "title": "https://www.mturk.com/ does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "887430": {
+        "url": "https://www.consumerreports.org/cro/index.htm",
+        "ua": "FirefoxDesktop",
+        "steps": [],
+        "title": "Consumerreports.com - Style sheet doesn't load due to Mixed Content Blocker",
+        "testType": "mixed-content-blocking"
+    },
+    "862750": {
+        "url": "https://www.theverge.com/",
+        "ua": "FirefoxOS",
+        "steps": [
+        ],
+        "title": "https://www.theverge.com/ does not render properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "896746": {
+        "url": "https://www.techsupportalert.com/",
+        "steps": [
+            function(){return mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "https://www.techsupportalert.com/ does not work properly because of mixed content blocking",
+        "testType": "mixed-content-blocking"
+    },
+    "463639": {
+        "url": "http://edition.cnn.com/ELECTION/2008/results/president/",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return document.querySelector('#cnnResults .loading') === null}
+        ],
+        "title": "cnn US presidential elections page never finishes loading (CORS request + redirect back to same-origin)"
+    },
+    "293634": {
+        "url": "https://mybank.icbc.com.cn/icbc/perbank/index.jsp",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){
+                return top.frames[0].location.href.indexOf('SysVersionTip') === -1
+            }
+        ],
+        "title": "mybank.icbc.com.cn - form input password activeX plug-in required"
+    },
+    "973754": {
+        "url": "http://www.google.com/",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return document.querySelector('a[aria-label="Search by voice"]') !== null}
+        ],
+        "title": "https://www.google.com offers \"voice search\" in Chrome but not Firefox"
+    },
+    "577779": {
+        "url": "http://www.cigrjournal.org/index.php/Ejounral/article/view/653/647",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return document.body.textContent.indexOf('%PDF') === -1}
+        ],
+        "title": "cigrjournal.org - some PDFs served as text/html"
+    },
+    "1023977": {
+        "url": "http://m.wyborcza.pl",
+        "ua": "FirefoxAndroid",
+        "steps": [
+            function(){return document.getElementById('cookieInfoMsgWrapper').firstElementChild.offsetWidth <= window.innerWidth;}
+        ],
+        "title": "m.wyborcza.pl - page extends to the right"
+    },
+    "151936": {
+        "url": "http://www.fipa.org/repository/bystatus.html",
+        "ua": "FirefoxDesktop",
+        "steps": [
+            function(){
+                if(typeof F_E2 !=='function')return 'Can not test, no function F_E2'
+                try{
+                    F_E2();
+                    return true;
+                }catch(e){
+                    return false;
+                }
+            }
+        ],
+        "title": "fipa.org - Javascript roll-over images not working correctly"
+    },
+    "1057221": {
+        "url": "http://mixi.jp/",
+        "steps": [
+            function(){
+                var elm = document.querySelector('.listStyle01 li');
+                return getComputedStyle(elm, '').boxSizing === 'border-box';
+            }
+        ],
+        "ua": "iPhone",
+        "title": "mixi.jp Mobile version is using the old-old CSS webkit flexbox syntax"
+    },
+    "1026964": {
+        "url": "http://m.taobao.com/",
+        "steps": [
+            function(){return getComputedStyle(document.querySelector('#apps ul li div')).display === 'flex';}
+        ],
+        "ua": "FirefoxAndroid",
+        "title": "taobao.com serves webkitcss to Firefox Android"
+    },
+    "1013080": {
+        "url": "http://gnavi.co.jp",
+        "steps": [
+             function(){return getComputedStyle(document.querySelector('.top_toggle .list>div')).display === 'flex';}
+       ],
+        "ua": "FirefoxAndroid",
+        "title": "gnavi.co.jp sends Webkit CSS to Firefox Android (and eventually Firefox OS)"
+    },
+    "1079818": {
+        "url": "https://support.us.playstation.com/app/answers/detail/a_id/1488/kw/safe%20mode",
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "Playstation.com support site sends desktop version to Firefox OS smartphones "
+    },
+    "1079823": {
+        "url": "http://www.cbsnews.com/video/watch/?id=7421030n",
+        "steps": [
+            function(){return hasMobileOptimizedMeta() && mobileLinkOrScriptUrl() && hasHandheldFriendlyMeta();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "CBSnews.com sends desktop version to Firefox OS smartphones, video won't work"
+    },
+    "1079830": {
+        "url": "https://www.dell.com",
+        "steps": [
+            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+        ],
+        "ua": "FirefoxOS",
+        "title": "dell.com sends desktop site to Firefox OS"
+    },
+    "862743": {
+        "url": "http://nfl.com",
+        "ua": "FirefoxOS",
+        "steps": [
+            function(){return document.getElementsByTagName('nav').length > 0}
+        ],
+        "title": "nfl.com sends desktop content to Firefox OS and Firefox for Android"
+    },
+    "1015600": {
+        "url": "http://play.google.com",
+        "steps": [
+            function(){
+                document.body.classList.add('nav-open');
+                var elm = document.getElementById('wrapper');
+                if(!elm)return 'could not test, wrapper element missing';
+                return getComputedStyle(elm, '').transform !== 'none';
+            }
+        ],
+        "ua": "FirefoxAndroid",
+        "title": "Mobile Google Play menu does not work on Firefox for Android (pointerdown and pointerup events do not fire even though feature detection indicates support)"
+    },
     "1050504": {
         "url": "https://stacksocial.com/",
         "steps": [
@@ -69,16 +249,14 @@ var bugdata = {
     },
     "881485": {
         "url": "https://www.apple.com/apple-events/june-2013/",
-        "steps": [
-        ],
+        "steps": [],
         "ua": "FirefoxDesktop",
         "title": "https://www.apple.com/apple-events/june-2013/ does not work properly because of mixed content blocking",
         "testType": "mixed-content-blocking"
     },
     "879081": {
         "url": "https://support.us.playstation.com/app/answers/detail/a_id/1488/kw/safe%20mode",
-        "steps": [
-        ],
+        "steps": [],
         "ua": "FirefoxDesktop",
         "title": "https://support.us.playstation.com/ does not work properly because of mixed content blocking",
         "testType": "mixed-content-blocking"
@@ -162,6 +340,14 @@ var bugdata = {
         ],
         "ua": "FirefoxOS",
         "title": "cinepolis.com.mx sends desktop site to Firefox OS"
+    },
+    "1081239": {
+        "url": "https://www.cmbchina.com",
+        "steps": [
+            function(){return hasViewportMeta() && location.hostname === "m.cmbchina.com";}
+        ],
+        "ua": "FirefoxOS",
+        "title": "cmbchina.com sends desktop content to Firefox OS"
     },
     "877761": {
         "url": "https://www.cmbchina.com",

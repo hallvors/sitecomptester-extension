@@ -93,3 +93,25 @@
 960850
 # this requires login to some odd system..
 965050
+# not sure if this service still exists
+955864
+# takes ages, requires memory measurements
+841005
+# not important
+984675
+# requires testing with JS off but nevertheless reading style/layout info from document. We don't really have any rig for that..
+778030
+# a moz site..
+976936
+# requires a specific Flash version, we won't be able to test that - IMO faking navigator.mimeTypes details isn't worth it
+947751
+# needs a very specific timing in the video playback - somewhat hard
+714037
+# sort of a meta-ish bug, not related to a specific broken page
+1008804
+# OOM, can't test
+1011524
+# test/demo
+589639
+# no page we're aware of for this issue
+265073
