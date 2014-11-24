@@ -1,0 +1,41 @@
+{
+"linkedin.com": {
+    "url":"https://linkedin.com",
+    "comment": "first clickMeFirst selector is only on mobile site. Second is an app nag screen on the mobile site. Both need clicking...",
+    "clickMeFirst":[
+        {"id":"sign-in-button"},
+        {"id":"action-no-app"}
+    ],
+    "clickMeLast":[
+        {"id":"action-no-app"}
+    ],
+    "usernameElm": {"name":"session_key", "id":"session_key-login"},
+    "u": "[censored]",
+    "passwordElm": {"name":"session_password", "id":"session_password-login"},
+    "p": "[censored]",
+    "otherElms":null,
+    "submitElm": [{"id": "signin"}, {"id":"signin-submit"}]
+},
+"twitter.com" : {
+    "url":"https://twitter.com",
+    "clickMeFirst":{"selector":"a.signin"},
+    "u": "[censored]",
+    "p": "[censored]",
+    "usernameElm": [{"name":"session[username_or_email]", "id":"signin-email"}, {"id":"username", "name":"username"}],
+    "passwordElm": [{"name":"session[password]", "id":"signin-password"}, {"id":"password", "name":"password"}],
+    "otherElms":null,
+    "comment": "slightly complex because there are two login forms in the DOM",
+    "submitElm": [{"selector":"div.front-signin form.signin button.submit"}, {"id":"signupbutton"}]
+},
+"mail.google.com":{
+    "url":"https://mail.google.com",
+    "loginDomains": ["accounts.google.com"],
+    "usernameElm":{"id":"Email"},
+    "passwordElm":{"id":"Passwd"},
+    "u":"[censored]",
+    "p":"[censored]",
+    "otherElms":null,
+    "submitElm":{"id":"signIn"}
+}
+}
+
