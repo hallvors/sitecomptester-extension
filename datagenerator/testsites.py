@@ -2,13 +2,16 @@ from marionette import Marionette
 import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse, glob
 import pdb
 
-dirname = 'C:\\mozilla\\testing\\missing-2014-09-16\\'
+dirname = 'c:\\mozilla\\testing\\mbdtest\\'
 scriptdir = os.path.dirname(os.path.realpath(__file__)) + os.path.sep
 filename = dirname + 'sites.txt'
 start_at = 0
 run_until = None
+manual_complete_test = False
+replay_data = None
 all_data = {}
 title_map = {}
+active_sessions = {}
 
 ignored_bugs = []
 for line in open(scriptdir+'..'+os.path.sep+'ignored_bugs.txt'):
@@ -18,12 +21,18 @@ for line in open(scriptdir+'..'+os.path.sep+'ignored_bugs.txt'):
 parser = argparse.ArgumentParser(description=("Test a list of sites, make screenshots"))
 parser.add_argument("-i", dest='index', type=int, help="the index in the list of the site you want to test, 0-based", default=None)
 parser.add_argument("-s", dest='start_at', type=int, help="start at a certain index in list, 0-based", default=0)
+parser.add_argument("-m", dest='manual', type=int, help="pass -m 1 to only proceed to next site on manual input", default=0)
+parser.add_argument("-r", dest='replay_file', type=str, help="pass -r file.json to use 'replay data' from file", default=None)
 args = parser.parse_args()
-if args.index is not None:
+if args.index:
     start_at = args.index
     run_until = args.index
 if args.start_at is not 0:
     start_at = args.start_at
+if args.manual is 1:
+    manual_complete_test = True
+if args.replay_file:
+    replay_data = read_json_file(args.replay_file)
 
 if not os.path.exists(dirname+'comp'):
     os.mkdir(dirname+'comp')
@@ -43,14 +52,25 @@ file_index = []
 
 def set_mozilla_pref(marionette_instance, name, value):
     marionette_instance.set_context(marionette_instance.CONTEXT_CHROME)
-    js = """
-        var pref = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
-        var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
-        str.data = "%s";
-        pref.setComplexValue("%s", Components.interfaces.nsISupportsString, str)
-    """ % (value, name)
+    if type(value) is str:
+        js = """
+            var pref = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
+            var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+            str.data = "%s";
+            pref.setComplexValue("%s", Components.interfaces.nsISupportsString, str)
+        """ % (value, name)
+    elif type(value) is bool:
+        js = """
+            var pref = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
+            pref.setBoolPref("%s", %s)
+        """ % (name, str(value).lower())
+    elif type(value) is int:
+        js = """
+            var pref = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
+            pref.setIntPref("%s", %s)
+        """ % (name, str(value))
     marionette_instance.execute_script(js)
-    marionette_instance.set_context(marionette_instance.CONTEXT_CONTENT)
+    m.set_context(m.CONTEXT_CONTENT)
 
 def spoof_firefox_os():
     set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Mobile; rv:26.0) Gecko/26.0 Firefox/26.0')
@@ -74,7 +94,8 @@ def spoof_android_browser():
 
 def inject_js():
     m.set_context(m.CONTEXT_CONTENT)
-    js = """o={hasHandheldFriendlyMeta: false, hasViewportMeta: false, hasMobileOptimizedMeta:false, mobileLinkOrScriptUrl: false, hasVideoTags:false}
+    js = """o={hasHandheldFriendlyMeta: false, hasViewportMeta: false, hasMobileOptimizedMeta:false,
+        mobileLinkOrScriptUrl: false, hasVideoTags:false, pageWidthFitsScreen: false, hasHtmlOrBodyMobileClass: false}
     try{
     for(var elms = document.getElementsByTagName('meta'), el, i=0; el=elms[i]; i++){
         if(/HandheldFriendly/i.test(el.getAttribute('name')) && /true/i.test(el.getAttribute('content')))o.hasHandheldFriendlyMeta=true;
@@ -89,6 +110,11 @@ def inject_js():
     for(var i=0,el; el=document.scripts[i];i++){if(el.src&&el.src.indexOf(str)>-1){o.mobileLinkOrScriptUrl = true;}}
     for(var i=0,el,elms=document.getElementsByTagName('link'); el=elms[i];i++){if(el.href&&el.href.indexOf(str)>-1){o.mobileLinkOrScriptUrl = true;}}
     o.hasVideoTags = !!document.getElementsByTagName('video').length;
+    var docwidth = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+    if(docwidth > (window.innerWidth * 1.02))o.pageWidthFitsScreen = true; // page is more than 2 percentage points wider than than window width
+    ['mobile', 'touch'].forEach(function(str){
+        if(document.documentElement.classList.contains(str) || document.body.classList.contains(str)) o.hasHtmlOrBodyMobileClass = true;
+    });
     }catch(e){o.error=e.message}
     o.hostname = location.hostname;
     return JSON.stringify(o);
@@ -128,6 +154,24 @@ def host_from_url(url):
         tmp = '%s.%s' % (tmp.domain, tmp.suffix)
     return tmp
 
+def try_replay_actions(m, hostname, replay_data):
+    elm_sel = replay_data["elmRef"][0]
+    elm_idx = replay_data["elmRef"][1]
+    try:
+        elm = m.find_elements('css selector', elm_sel)
+        if elm and len(elm) > 0:
+            elm = elm[elm_idx]
+    except:
+        if replay_data["type"] == "exists":
+            return False
+        raise 'element not found'
+
+    if replay_data["type"] == "click":
+        elm.click()
+        wait_for_readystate_complete(m)
+    elif replay_data["type"] == "exists":
+        return True
+
 def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, clear_session=True):
     if url:
         try:
@@ -136,7 +180,16 @@ def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, c
             #m.delete_session()
             #m.start_session()
             print "now loading "+url
+            m.set_context(m.CONTEXT_CONTENT)
             m.navigate(url)
+            # if we have some special sauce commands for this host, we can try them out here..
+            print('loaded %s' % m.get_url())
+            if replay_data and hostname in replay_data:
+                for action in replay_data[hostname]:
+                    try_replay_action(m, hostname, action)
+                    wait_for_readystate_complete(m)
+            if manual_complete_test:
+                raw_input('Interact with the website if required, press any key to continue')
         except:
             try:
                 print 'Failed loading '+url+', trying again with www.'
@@ -212,21 +265,7 @@ def try_login(marionette_instance, hostname, extra_delay_time):
     #pdb.set_trace()
     if 'clickMeFirst' in login_data[hostname]:
         print '  we need to start clickin..'
-        if isinstance(login_data[hostname]['clickMeFirst'], list):
-            for cmf in login_data[hostname]['clickMeFirst']:
-                elm = findElm(marionette_instance, cmf)
-                print cmf
-                print elm
-                if elm and elm.is_enabled():
-                    print '  clickin\''
-                    clickElm(marionette_instance, elm)
-        else:
-            elm = findElm(marionette_instance, login_data[hostname]['clickMeFirst'])
-            print '  click me first:'
-            print elm
-            if elm:
-                print '  clickin\''
-                clickElm(marionette_instance, elm)
+        try_click_elms(marionette_instance, login_data[hostname]['clickMeFirst'])
     # TODO: not sure if we can detect whether that click did anything..like navigation..?
     time.sleep(1 * extra_delay_time)
     wait_for_readystate_complete(marionette_instance)
@@ -268,6 +307,11 @@ def try_login(marionette_instance, hostname, extra_delay_time):
     # TODO: not sure if we can detect whether logging in did anything..like navigation..?
     time.sleep(1 * extra_delay_time)
     wait_for_readystate_complete(marionette_instance)
+    if 'clickMeLast' in login_data[hostname]:
+        print '  we need to go out clickin..'
+        try_click_elms(marionette_instance, login_data[hostname]['clickMeLast'])
+
+    #active_sessions[hostname] = True
     return True
 
 def wait_for_readystate_complete(marionette_instance):
@@ -278,15 +322,14 @@ def wait_for_readystate_complete(marionette_instance):
             time.sleep(5)
     # readyState is now complete. Let's check if the BODY element is 'displayed'
     for x in xrange(1,10):
-        elm = findElm(marionette_instance, {"selector":"body"})
+        elm = findElm(marionette_instance, {"selector":"frameset"})
+        if not elm:
+            elm = findElm(marionette_instance, {"selector":"body"})
         if elm and elm.is_displayed():
             return
         else:
             print 'sleeping because body is not shown yet  (' + str(x) + '/10)'
             time.sleep(5)
-
-
-
 
 def findElm(marionette_instance, targets):
     """
@@ -316,6 +359,24 @@ def findElm(marionette_instance, targets):
             except:
                 pass
 
+def try_click_elms(marionette_instance, elms):
+    if isinstance(elms, list):
+        for cmf in elms:
+            elm = findElm(marionette_instance, cmf)
+            print cmf
+            print elm
+            if elm and elm.is_enabled():
+                print '  clickin\''
+                clickElm(marionette_instance, elm)
+    else:
+        elm = findElm(marionette_instance, elms)
+        print '  click me first:'
+        print elm
+        if elm:
+            print '  clickin\''
+            clickElm(marionette_instance, elm)
+
+
 def clickElm(marionette_instance, elm):
     marionette_instance.execute_script('arguments[0].scrollIntoView()', [elm])
     if elm.is_enabled():
@@ -332,7 +393,7 @@ if start_at > 0 and os.path.exists(dirname+'comp'+os.path.sep+'idx.js'):
 all_data = read_json_file(dirname+'..'+os.path.sep+'data.js')
 out_obj = read_json_file(dirname+'sitedata-automated.js')
 out_missing = read_json_file(dirname+'sitedata-missing.js')
-# This file is incomplete in the Git repo - for obvious reasons.. Will have to be filled with user names and passwords
+# This file is incompleread_json_filete in the Git repo - for obvious reasons.. Will have to be filled with user names and passwords
 login_data = read_json_file(scriptdir+'..'+os.path.sep + "data" + os.path.sep +'logins.json')
 # This file will contain per-site instructions for "special" named screenshots
 special_screenshots = read_json_file(scriptdir+'..'+os.path.sep+'special_screenshots.json')
@@ -368,7 +429,7 @@ with open(filename, 'r') as handle:
                 print 'firefox spoof results: '+fxresults
                 empty_firefox_cache(m)
                 spoof_safari_ios()
-                wkresults = load_and_check(url, hostname, 'wk-spoof-')
+                wkresults = load_and_check(url, hostname, 'wk-spoof')
                 print 'AppleWebKit spof results', wkresults
             except:
                 try:
@@ -411,11 +472,11 @@ with open(filename, 'r') as handle:
                         spoof_firefox_os()
                     else:
                         spoof_safari_ios()
-                    if 'login_first' in testdata and testdata['login_first']:
+                    if 'login_first' in testdata and testdata['login_first'] and hostname not in active_sessions:
                         login_status = try_login(m, hostname, 1)
                         if login_status == False: # we'll wait 5 times longer between navigation if first time failed..
                             login_status = try_login(m, hostname, 5)
-                    else:
+                    elif hostname not in active_sessions:
                         m.delete_all_cookies()
                     # TODO: don't drop the return value from load_and_check on the floor, find a way to use it..
                     load_and_check(testdata['url'], hostname, rndr_engine, str(ss_index), testdata, False)
@@ -459,6 +520,9 @@ with open(filename, 'r') as handle:
                 if diff_ratio(ss_a.read(), ss_b.read()) < 1.0:
                     subprocess.call(["c:\\Program Files (x86)\\IrfanView\\i_view32.exe", '/panorama=(1,%s%s,%swk-spoof-%s)' % (dirname,f,dirname,f), '/convert %scomp\\%s' % (dirname,f)], bufsize=100)
                     if run_until is None: # We only want to overwrite the index if we're not doing a "partial" run..
+                        if dirname+f not in title_map:
+                            title_map[dirname+f] = ''
+                            print 'lacking title for %s%s' % (dirname, f)
                         file_index.append({'name':f,'hostname':tmp, 'fullurl':url, 'title': title_map[dirname+f]})
                         jsf = open(dirname+'comp'+os.path.sep+'idx.js', 'w')
                         jsf.write(json.dumps(file_index, indent=4))

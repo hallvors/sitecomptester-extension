@@ -1,18 +1,20 @@
 {
     "mail.google.com": [
-        {"title":"Inbox screen", "url":"https://mail.google.com", "login_first":true},
+        {"title":"Inbox screen", "url":"https://mail.google.com", "login_first":true,
+        "inject_js_before":"if(document.getElementById('blpromo')){ /*app splash*/ document.getElementById('blpromo').getElementsByTagName('a')[0].click()}"
+        },
         {
             "title":"Menu open",
             "url":"https://mail.google.com",
             "login_first":true,
-            "inject_js_before":"document.querySelector('div[aria-label=\"Menu\"], div[aria-label=\"Meny\"], a[href*=\"v=mnu\"]').click()",
+            "inject_js_before":"if(document.getElementById('blpromo')){ /*app splash*/ document.getElementById('blpromo').getElementsByTagName('a')[0].click()}  document.querySelector('div[aria-label=\"Menu\"], div[aria-label=\"Meny\"], a[href*=\"v=mnu\"]').click()",
             "inject_js_after":"history.back()"
         },
         {
             "title":"Compose message screen",
             "url":"https://mail.google.com",
             "login_first":true,
-            "inject_js_before":"document.querySelector('div[aria-label*=\"Write\"], div[aria-label*=\"Compose\"], div[aria-label*=\"Skriv\"], a[href*=\"&v=b&\"]').click()",
+            "inject_js_before":"if(document.getElementById('blpromo')){ /*app splash*/ document.getElementById('blpromo').getElementsByTagName('a')[0].click()}document.querySelector('div[aria-label*=\"Write\"], div[aria-label*=\"Compose\"], div[aria-label*=\"Skriv\"], a[href*=\"&v=b&\"]').click()",
             "inject_js_after":"history.back()"
         }
     ],
@@ -24,6 +26,14 @@
         },{
             "title":"Main landing page after login",
             "url": "https://linkedin.com",
+            "login_first":true
+        },{
+            "title": "LinkedIn pulse",
+            "url": "https://www.linkedin.com/today/",
+            "login_first": true
+        }, {
+            "title": "LinkedIn profile editor",
+            "url": "https://www.linkedin.com/profile/edit",
             "login_first":true
         }
     ],

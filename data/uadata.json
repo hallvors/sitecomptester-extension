@@ -34,6 +34,13 @@
 "general.useragent.vendor":"",
 "general.useragent.vendorSub":""},
 
+"FirefoxOS2.0":{"general.appname.override":"Netscape",
+"general.appversion.override":"5.0 ()",
+"general.platform.override":"",
+"general.useragent.override":"Mozilla/5.0 (Mobile; rv:36.0) Gecko/36.0 Firefox/36.0",
+"general.useragent.vendor":"",
+"general.useragent.vendorSub":""},
+
 "FirefoxOS1.4":{"general.appname.override":"Netscape",
 "general.appversion.override":"5.0 ()",
 "general.platform.override":"",

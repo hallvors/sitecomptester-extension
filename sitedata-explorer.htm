@@ -74,6 +74,11 @@ function listMissingResults(str){
 
 }
 </script>
+<!-- sitedata.js is a JS file, not JSON - to move this to Python we need a proper JSON version -->
+<script>Function.prototype.toJSON = function(){return this.toString();}</script>
+<button onclick="document.getElementsByTagName('pre')[0].textContent = JSON.stringify(bugdata, null, 4)">Export all as JSON</button>
+
+
 <p>Search by bug or hostname: <input type="text" onkeyup="search(this.value)" onchange="search(this.value)" list="allbugs"></p>
 <dl id="buglist"></dl>
 <p>Paste tab-separated bug data (first field bug number) here to filter out those bugs that have tests already:</p>
@@ -82,5 +87,4 @@ function listMissingResults(str){
 <p>..or paste bug result data here to get a list of tests that didn't run:</p>
 <textarea onchange="listMissingResults(this.value)"></textarea>
 <pre></pre>
-
 </body></html>

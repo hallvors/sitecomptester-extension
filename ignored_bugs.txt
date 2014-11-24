@@ -115,3 +115,11 @@
 589639
 # no page we're aware of for this issue
 265073
+# ignore decision during dualdriver testing
+1094999
+# ignore decision during dualdriver testing
+966780
+# ignore decision during dualdriver testing
+458965
+# ignore decision during dualdriver testing
+868710

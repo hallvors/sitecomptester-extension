@@ -1,19 +1,18 @@
 phantom.injectJs('data/sitedata.js');
 
-var testsFile = 'http://hallvord.com/temp/moz/stdTests.js';
+var testsFile = 'http://arewecompatibleyet.com/js/stdTests.js';
 var date = new Date();
 var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
 var results=[];
 var uadata = require('data/uadata.json');
 var ua, consoleMessages = [];
 var page = createPage();
-var hasHttpResources=false;
+var httpResources=[];
 var runSpecificBugTest = null;
 if(phantom.args.length > 0){
 	if(phantom.args.length > 1)console.log('Will run tests for bugs '+phantom.args)
 	runSpecificBugTest = phantom.args; // we can pass in a bug number on the command line to run that test only..
 }
-
 
 var bugIdx=-1, currentTest=0, bug;
 var bugs = Object.keys(bugdata);
@@ -81,7 +80,7 @@ function nextBug () {
 
 function loadSite(){
 	consoleMessages = []; // per-site, clear them before loading the next one
-	hasHttpResources = false; // also per-site
+	httpResources = []; // also per-site
 	jobTime(function(){
 		console.log('TIMEOUT! for '+bug);
 		if (page.url.indexOf(bugdata[bug].url)>-1) { // we're not done loading, but let's try to run those tests anyway..
@@ -96,9 +95,8 @@ function loadSite(){
 		if(status == 'success'){
 			console.log('success for '+page.url);
 			if(!xhrTestUrl){
-				if(bugdata[bug].testType === 'mixed-content-blocking'){
-					registerTestResult(!hasHttpResources, 'http: resources loading');
-					nextBug();
+				if(bug && bugdata[bug] && bugdata[bug].testType === 'mixed-content-blocking'){
+					// let's check this test result in onLoadFinished for the main URL to make sure we catch late-loading HTTP resources
 				}else{
 					page.includeJs(testsFile, function(){
 						jobTime(runTestStep, 100);
@@ -195,7 +193,7 @@ function writeResultsToFile(){
     f.close();
     if(runSpecificBugTest && runSpecificBugTest.length === 0){
     	console.log(results);
-    	setTimeout( function(){ phantom.exit(); }, 2000);
+    	setTimeout( function(){ phantom.exit(); }, 32000);
     }
 }
 function injectJS(page, ua){
@@ -244,7 +242,7 @@ function createPage(){
 	    console.log('received: ' + desc);
 	    if(/http:\/\//.test(res.url)){
 	    	//console.log('HTTP URL! '+res.url);
-			hasHttpResources = true;
+			httpResources.push(res.url);
 		}
 	}
 	page.onResourceReceived = function (res) {
@@ -270,7 +268,7 @@ function createPage(){
 			registerTestResult(result, 'header check complete');
 			jobTime(nextBug, 10);
 		}else if(/http:\/\//.test(res.url)){
-			hasHttpResources = true;
+			httpResources.push(res.url);
 	    	//console.log('HTTP URL! '+res.url);
 		}
 	};
@@ -291,6 +289,11 @@ function createPage(){
 				page.open('about:blank');
 				jobTime(nextBug, 10);
 			}
+		}else if(bugdata[bug].testType === 'mixed-content-blocking'){
+			setTimeout(function(){
+				registerTestResult(!httpResources.length,  (httpResources.length ? httpResources.length + ' http: resources loaded on this https: page' : ''));
+				nextBug();
+			}, 2000)
 		}else{
 			if(!isFrame)jobTime(runTestStep, 800);
 		}
