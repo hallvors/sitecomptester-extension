@@ -131,6 +131,7 @@ function runTestStep () {
 				// Somewhat unexpectedly, evaluateJavaScript doesn't throw if the script throws..
 				//console.log('result now '+result)
 				if(/^EXCEPTION:/.test(result))throw result;
+
 				if(result == 'delay-and-retry'){
 					if(retryCount<10){
 						jobTime(runTestStep, 2500);
@@ -138,23 +139,38 @@ function runTestStep () {
 						retryCount++
 						return;
 					}else{
-						registerTestResult('TIMEOUT - page ready test failed after 5 attempts');
+						registerTestResult('TIMEOUT - page ready test failed after 10 attempts');
 						return;
 					}
 				}
 				currentTest++;
 				retryCount=0;
-				if (bugdata[bug].steps[currentTest]) {
+				if (bugdata[bug].steps[currentTest]) { // We have more steps to do before completing this test..
 					// can we get back to this?
 					// TODO: do something more clever than a timeout..
 					console.log('will wait for next test..');
 					return setTimeout(runTestStep, 500)
+				}else{ // We're done with all steps - consider us (nearly) done testing for this bug
+					// However, we also handle mobNavElm where applicable. The idea is to simplify tests by specifying just a selector
+					// that is expected to match something in a complete mobile page but won't in a desktop page
+					// A typical example is a "burger menu" icon
+					if (bugdata[bug].mobNavElm){
+						var elmtestresult = page.evaluateJavaScript('var elm = document.querySelector("' + bugdata[bug].mobNavElm + '"); var cs = elm && getComputedStyle(elm, \'\');  elm && cs.display!=\'none\' && cs.visibility != \'hidden\' ? true : false; ');
+						if(!elmtestresult)console.log('ELMTEST FAILURE' + elmtestresult)
+						if(typeof(result) === 'boolean'){
+							result = result && elmtestresult;
+						}else{ // result is a string or will soon be stringified anyway
+							result += (elmtestresult ? ', mobNavElm was found' : ', mobNavElm was NOT found');
+						}
+					};
+					registerTestResult(result);
+					jobTime(nextBug, 10);
 				}
 			}catch(e){
 				result = e;
+				registerTestResult(result);
+				jobTime(nextBug, 10);
 			}
-			registerTestResult(result);
-			jobTime(nextBug, 10);
 		};
 	}else{
 		console.log('needs to include test file')
