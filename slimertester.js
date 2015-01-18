@@ -1,6 +1,7 @@
 phantom.injectJs('data/sitedata.js');
 
 var testsFile = 'http://arewecompatibleyet.com/js/stdTests.js';
+var testsFile = 'http://hallvord.com/temp/moz/stdTests.js';
 var date = new Date();
 var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
 var results=[];
@@ -13,7 +14,7 @@ if(phantom.args.length > 0){
 	if(phantom.args.length > 1)console.log('Will run tests for bugs '+phantom.args)
 	runSpecificBugTest = phantom.args; // we can pass in a bug number on the command line to run that test only..
 }
-
+var testHelperCode='';
 var bugIdx=-1, currentTest=0, bug;
 var bugs = Object.keys(bugdata);
 // temporary hack to start from given bug..
@@ -33,6 +34,16 @@ function jobTime(doJob, delay){
 jobTime(nextBug, 200);
 
 function nextBug () {
+	if(!testHelperCode){
+		page.open(testsFile, function(status){
+			console.log(status);
+			console.log(page.plainText);
+			testHelperCode = page.evaluateJavaScript('document.getElementsByTagName("pre")[0].textContent');
+			jobTime(nextBug, 10)
+		});
+		return;
+	}
+
 	if(runSpecificBugTest && runSpecificBugTest.length > 0){
 		bugIdx = bugs.indexOf(runSpecificBugTest.shift());
 		if(bugIdx === -1){
@@ -98,9 +109,8 @@ function loadSite(){
 				if(bug && bugdata[bug] && bugdata[bug].testType === 'mixed-content-blocking'){
 					// let's check this test result in onLoadFinished for the main URL to make sure we catch late-loading HTTP resources
 				}else{
-					page.includeJs(testsFile, function(){
-						jobTime(runTestStep, 100);
-					});
+					page.evaluateJavaScript(testHelperCode);
+					jobTime(runTestStep, 100);
 				}
 			}
 		}else{
@@ -156,7 +166,7 @@ function runTestStep () {
 					// A typical example is a "burger menu" icon
 					if (bugdata[bug].mobNavElm){
 						var elmtestresult = page.evaluateJavaScript('var elm = document.querySelector("' + bugdata[bug].mobNavElm + '"); var cs = elm && getComputedStyle(elm, \'\');  elm && cs.display!=\'none\' && cs.visibility != \'hidden\' ? true : false; ');
-						if(!elmtestresult)console.log('ELMTEST FAILURE' + elmtestresult)
+						if(!elmtestresult)console.log('ELMTEST FAILURE' + elmtestresult);
 						if(typeof(result) === 'boolean'){
 							result = result && elmtestresult;
 						}else{ // result is a string or will soon be stringified anyway
@@ -174,7 +184,8 @@ function runTestStep () {
 		};
 	}else{
 		console.log('needs to include test file')
-		page.includeJs(testsFile, runTestStep);
+		page.evaluateJavaScript(testHelperCode);
+		runTestStep();
 	}
 }
 
@@ -290,8 +301,10 @@ function createPage(){
 	};
 
 	page.onLoadFinished = function (status, url, isFrame) {
-		console.log('onLoadFinished '+status+' '+url+' '+isFrame);
-
+		//console.log('onLoadFinished '+status+' '+url+' '+isFrame);
+		if(url === testsFile){
+			//console.log(page.content);
+		}
 		if(xhrTestUrl){
 			if(page.content === '<html><head></head><body></body></html>'){
 				// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
