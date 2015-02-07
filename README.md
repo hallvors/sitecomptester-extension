@@ -71,7 +71,10 @@ All properties but **BUG_ID**, **URL**, **steps** and **ua** are optional.
  * **ua** An indication of how the browser should identify itself for this test. Valid values are defined in data/uadata.json. 
  * **injectScript** If a test relies on a certain page / environment state, this property can be defined. Any script specified here will be injected into the page as soon as possible when it loads. **Not currently implemented for extension testing - slimerjs only**.
  * **title** Optionally add the bug's summary to the test. This makes the test file more readable and the tests easier to review.
- * **testType** The only valid value for this property is 'xhr'. This means the test can be run by doing an XMLHttpRequest for the URL and pass the response to the function(s) listed in steps. **Not completely implementable in slimerjs**.
+ * **testType** The only valid values for this property are 'xhr' and 'mixed-content-blocking'. The value 'xhr' means the test can be run by doing an XMLHttpRequest for the URL and pass the response to the function(s) listed in steps. **Not completely implementable in slimerjs**. The value 'mixed-content-blocking' means the test should monitor resources loaded by the page and note any that are http://. TODO: support 'xhtml' to look for invalid XHTML data?
+ * **stepInFrame** is an object telling the framework to run a specific step's JavaScript inside a specific frame - such as stepInFrame:{2:'frame_name'}
+ * **mobNavElm** gives a selector that will check if a given element is present - for example "mobNavElm": "button.navbar-toggle" will ensure the test only passes if an element matching this selector is present and visible
+
 
 ## Predefined functions
 
