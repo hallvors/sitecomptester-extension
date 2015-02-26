@@ -123,3 +123,5 @@
 458965
 # ignore decision during dualdriver testing
 868710
+# bing.com has animated backgrounds *sometimes*, can't be tested reliably
+1101649
