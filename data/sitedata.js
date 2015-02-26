@@ -11,6 +11,34 @@ var hosts = {};
 
 */
 var bugdata = {
+    '1122445' : {
+        url:'https://www.sparebank1.no/hedmark/',
+        ua:'FirefoxDesktop',
+        steps:[
+            function(){
+                document.getElementsByClassName('loginInput')[0].value = '00000000000';
+                document.getElementsByClassName('loginInput')[0].form.submit();
+            },
+            function(){ /* We need an IFRAME */
+                if(window.length === 0) return 'delay-and-retry';
+                document.getElementsByTagName('iframe')[0].setAttribute('name', 'bankid_iframe_I_presume')
+            },
+            function(){
+                if(document.querySelector('div.loader_wrapper')) return 'delay-and-retry';
+                return document.getElementsByTagName('form').length > 0;
+            }
+        ],
+        stepInFrame:{2:'bankid_iframe_I_presume'},
+        title:"CSP change in behavior regards case sensitivity loading resources - breaks Norwegian BankID authentication"
+    },
+    "1115811": {
+        "url": "http://tiscali.it",
+        "steps": [
+            function(){return hasViewportMeta() && pageWidthFitsScreen() && location.hostname === "m.tiscali.it";}
+        ],
+        "ua": "FirefoxOS",
+        "title": "tiscali.it doesn't redirect to mobile site"
+    },
     '1116139' : {
         url:'http://www.atrapalo.com/',
         ua:'FirefoxOS',
@@ -3436,7 +3464,17 @@ var bugdata = {
     "935472" : {
 		url: 'http://blip.tv/commercialbreak/selling-out-colleen-ryan-6687803',
 		 ua: "FirefoxOS",
-		steps:[function(){return hasViewportMeta() /*(regression test, expected to pass)*/ && document.getElementById('PlayeriFrame')!==null}]
+         // unfortunately this test can't detect the lack of a playButton *inside* the IFRAME
+         // due to some (odd) cross-domain limitations
+		steps:[function(){
+            if(document.getElementById('PlayeriFrame')!==null){
+                document.getElementById('PlayeriFrame').name = 'PlayeriFrame'};
+                return hasViewportMeta() /*(regression test, expected to pass)*/
+            },
+            function(){
+                return document.getElementById('playButton') != null;
+            }],
+        stepInFrame:{1:'PlayeriFrame'}
 	},
     /*'924386' : {
         url:'https://mobile.twitter.com/trutherbot',
@@ -4004,7 +4042,13 @@ var automated_tests={
 	"826711" : {
 		url: 'http://bb.com.br',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.bb.com.br")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[
+            function(){
+                if(document.getElementById('redirectIph'))return 'delay-and-retry';
+                return location.hostname.indexOf("m.bb.com.br")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()
+            }
+        ],
+        "title": "bb.com.br doesn't recognize B2G UA as mobile"
 	},
 	"878226" : {
 		url: 'http://bet365.com',
@@ -4840,14 +4884,15 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return hasViewportMeta()}]
 	},
-	"827630" : {
+    // Commenting out this vagalume test because
+/*	"827630" : {
 		url: 'http://vagalume.com.br',
-		 ua: "FirefoxOS",
+		 ua: "FirefoxOS2.0",
 		steps:[
             function(){},
-            function(){return location.hostname.indexOf("m.vagalume.com.br")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta()}
+            function(){return location.hostname.indexOf("m.vagalume.com.br")>-1  && hasViewportMeta()}
         ]
-	},
+	},*/
 	"878253" : {
 		url: 'http://vatera.hu',
 		 ua: "FirefoxOS",
@@ -6779,7 +6824,7 @@ var automated_tests={
     "962922": {
         "url": "http://www.montrealgazette.com/",
         "steps": [
-            function(){return hasViewportMeta() && mobileLinkOrScriptUrl();}
+            function(){return hasViewportMeta() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "montrealgazette.com sends desktop content to Firefox OS, Firefox Android and Opera Mobile"
@@ -7053,7 +7098,7 @@ var automated_tests={
     "969852": {
         "url": "http://www.otto.de",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.otto.de" && mobileLinkOrScriptUrl();}
+            function(){return hasViewportMeta()  && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "otto.de sends desktop site to Firefox OS"
