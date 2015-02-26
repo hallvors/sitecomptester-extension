@@ -6588,7 +6588,7 @@
     "982021": {
         "url": "http://balkanweb.com",
         "steps": [
-            "function (){return location.hostname === \"balkanweb.com\";}"
+            "function (){return hasViewportMeta() && location.hostname === \"www.balkanweb.com\";}"
         ],
         "ua": "FirefoxOS",
         "title": "balkanweb.com has broken layout in Firefox OS"
