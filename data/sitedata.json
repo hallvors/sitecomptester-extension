@@ -4749,7 +4749,7 @@
     "959106": {
         "url": "http://hexin.cn",
         "steps": [
-            "function (){return hasViewportMeta() && location.hostname === \"hexin.cn\";}"
+            "function (){return hasViewportMeta() && location.hostname === \"m.10jqka.com.cn\";}"
         ],
         "ua": "FirefoxOS",
         "title": "hexin.cn sends Firefox OS simplified page"
