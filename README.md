@@ -47,7 +47,7 @@ An individual test is embedded in a JavaScript object:
         "ua": "FirefoxOS", 
         "injectScript": "void(0)", 
         "title": "example.com is broken",
-        "testType":"xhr"
+        "testType":""
     }
 
 
