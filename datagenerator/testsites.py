@@ -1,10 +1,12 @@
 from marionette import Marionette
-import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse, glob
+import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse, glob, requests, traceback
 import pdb
 
-dirname = 'c:\\mozilla\\testing\\mbdtest\\'
+dirname = 'c:\\mozilla\\testing\\test\\'
 scriptdir = os.path.dirname(os.path.realpath(__file__)) + os.path.sep
 filename = dirname + 'sites.txt'
+DB_SERVER = 'http://compatdataviewer.com.paas.allizom.org/data/'
+DB_SERVER = 'http://localhost:8000/data/'
 start_at = 0
 run_until = None
 manual_complete_test = False
@@ -73,7 +75,13 @@ def set_mozilla_pref(marionette_instance, name, value):
     m.set_context(m.CONTEXT_CONTENT)
 
 def spoof_firefox_os():
-    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Mobile; rv:26.0) Gecko/26.0 Firefox/26.0')
+    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Mobile; rv:32.0) Gecko/32.0 Firefox/32.0')
+    set_mozilla_pref(m, 'general.useragent.appName', 'Netscape')
+    set_mozilla_pref(m, 'general.useragent.vendor', 'Mozilla')
+    set_mozilla_pref(m, 'general.useragent.platform', '')
+
+def spoof_firefox_android():
+    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Android; Mobile; rv:32.0) Gecko/32.0 Firefox/32.0')
     set_mozilla_pref(m, 'general.useragent.appName', 'Netscape')
     set_mozilla_pref(m, 'general.useragent.vendor', 'Mozilla')
     set_mozilla_pref(m, 'general.useragent.platform', '')
@@ -116,6 +124,7 @@ def inject_js():
         if(document.documentElement.classList.contains(str) || document.body.classList.contains(str)) o.hasHtmlOrBodyMobileClass = true;
     });
     }catch(e){o.error=e.message}
+    o.uastring = navigator.userAgent;
     o.hostname = location.hostname;
     return JSON.stringify(o);
     """
@@ -148,7 +157,7 @@ def empty_firefox_cache(marionette_instance):
 
 def host_from_url(url):
     tmp = tldextract.extract(url)
-    if not tmp.subdomain in ['www', '']:
+    if not tmp.subdomain in ['www', '', 'm']:
         tmp = '%s.%s.%s' % (tmp.subdomain, tmp.domain, tmp.suffix)
     else:
         tmp = '%s.%s' % (tmp.domain, tmp.suffix)
@@ -172,7 +181,7 @@ def try_replay_actions(m, hostname, replay_data):
     elif replay_data["type"] == "exists":
         return True
 
-def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, clear_session=True):
+def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, clear_session=True, file_desc={}):
     if url:
         try:
             if clear_session:
@@ -219,12 +228,13 @@ def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, c
     # I want a screenshot of the viewport. For this purpose, I consider that better than getting the full page
     # However, WebDriver spec says implementations *should* do the full page thing, and AFAIK there's no convenient way
     # to opt-in to only take the viewport..
+    # May 2015: OK, changed my mind. Layout problems sometimes are "below the fold"..
     elm = None
-    try:
-        m.execute_script('(function(){var elm=document.createElement(\'overlay\');elm.setAttribute(\'style\', \'display:block; position:fixed;top:0;left:0;right:0;bottom:0\');document.body.appendChild(elm)})()')
-        elm = m.find_elements('tag name', 'overlay')
-    except:
-        pass
+#    try:
+#        m.execute_script('(function(){var elm=document.createElement(\'overlay\');elm.setAttribute(\'style\', \'display:block; position:fixed;top:0;left:0;right:0;bottom:0\');document.body.appendChild(elm)})()')
+#        elm = m.find_elements('tag name', 'overlay')
+#    except:
+#        pass
     if elm:
         elm = elm[0]
         ss = base64.b64decode(m.screenshot(element=elm))
@@ -233,16 +243,18 @@ def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, c
     if rndr_engine:
         rndr_engine = rndr_engine +'-'
     fname = dirname+rndr_engine+("%03d-"%i)+hostname + sub_test_id + '.png'
+    check_results = json.loads(inject_js())
+    check_results['file_desc'] = {os.path.basename(fname): {'full_path': fname,  'engine': 'gecko', 'ua': check_results['uastring']}}
     title_map[fname] = ''
     if 'title' in testdata:
         title_map[fname] = testdata['title']
-
+        file_desc[fname]['title'] = testdata['title']
     ss_f = open(fname, 'wb')
     ss_f.write(ss)
     ss_f.close()
-    check_results = inject_js()
     if 'inject_js_after' in testdata:
         m.execute_script(testdata['inject_js_after'])
+    check_results['final_url'] = m.get_url()
     return check_results
 
 def try_login(marionette_instance, hostname, extra_delay_time):
@@ -384,6 +396,35 @@ def clickElm(marionette_instance, elm):
     else:
         marionette_instance.execute_script('arguments[0].click()', [elm])
 
+def save_data_to_db(domain_name, testdata_fx, testdata_wk):
+    destination_url = '%s%s' % (DB_SERVER, domain_name)
+    file_desc = testdata_fx['file_desc']
+    file_desc.update(testdata_wk['file_desc'])
+    multiple_files = []
+    data = {testdata_fx['uastring']:{'gecko':{'plugin_results':{}}},testdata_wk['uastring']:{'gecko':{'plugin_results':{}}}}
+    for prop in testdata_fx:
+        if prop in ['uastring', 'file_desc', 'engine', 'final_url']:
+            continue
+        data[testdata_fx['uastring']]['gecko']['plugin_results'][prop] = testdata_fx[prop]
+    data[testdata_fx['uastring']]['gecko']['final_url'] = testdata_fx['final_url']
+    for prop in testdata_wk:
+        if prop in ['uastring', 'file_desc', 'engine', 'final_url']:
+            continue
+        data[testdata_wk['uastring']]['gecko']['plugin_results'][prop] = testdata_wk[prop]
+    data[testdata_wk['uastring']]['gecko']['final_url'] = testdata_wk['final_url']
+    multiple_files = []
+    for filename in file_desc:
+        multiple_files.append(('screenshot',(os.path.basename(filename),open(file_desc[filename]['full_path'], 'rb'), 'image/png')))
+        del file_desc[filename]['full_path'] # don't leak local directory paths onto the internet..
+
+    post_data = {}
+    post_data['data'] = json.dumps(data)
+    post_data['file_desc'] = json.dumps(file_desc)
+    print('about to send data to %s' % destination_url)
+    req = requests.post(destination_url, files=multiple_files, data=post_data)
+    #print(req.text)
+
+
 i=0
 has_bug_data = False
 # If we don't start at 0, we must take care to not overwrite old results..
@@ -419,19 +460,22 @@ with open(filename, 'r') as handle:
         location = urlparse.urlparse(url)
         hostname = location.hostname.rstrip('\r\n')
         print str(i) + ' : ' + url
-        if has_bug_data and hostname in all_data and len(all_data[hostname]) > 0: # we have some test data stored from earlier, we might use them..
+        if False and has_bug_data and hostname in all_data and len(all_data[hostname]) > 0: # we have some test data stored from earlier, we might use them..
             compsteps = all_data[hostname]
         else:
             try:
                 empty_firefox_cache(m)
-                spoof_firefox_os()
+                spoof_firefox_android()
                 fxresults = load_and_check(url, hostname, '')
-                print 'firefox spoof results: '+fxresults
+                #print('firefox spoof results: ', fxresults)
                 empty_firefox_cache(m)
                 spoof_safari_ios()
                 wkresults = load_and_check(url, hostname, 'wk-spoof')
-                print 'AppleWebKit spof results', wkresults
-            except:
+                #print('AppleWebKit spof results', wkresults)
+                save_data_to_db(hostname, fxresults, wkresults)
+            except Exception, e:
+                traceback.print_exc()
+                print(e)
                 try:
                     m.delete_session()
                 except:
@@ -444,8 +488,6 @@ with open(filename, 'r') as handle:
                 continue
             compsteps = []
             if fxresults is not None and wkresults is not None:
-                fxresults = json.loads(fxresults)
-                wkresults = json.loads(wkresults)
                 for name in fxresults:
                     print name, wkresults[name] , fxresults[name]
                     if not wkresults[name] == fxresults[name]:
@@ -469,7 +511,7 @@ with open(filename, 'r') as handle:
                 for rndr_engine in ['', 'wk-spoof']:
                     empty_firefox_cache(m)
                     if rndr_engine is '':
-                        spoof_firefox_os()
+                        spoof_firefox_android()
                     else:
                         spoof_safari_ios()
                     if 'login_first' in testdata and testdata['login_first'] and hostname not in active_sessions:
@@ -479,7 +521,7 @@ with open(filename, 'r') as handle:
                     elif hostname not in active_sessions:
                         m.delete_all_cookies()
                     # TODO: don't drop the return value from load_and_check on the floor, find a way to use it..
-                    load_and_check(testdata['url'], hostname, rndr_engine, str(ss_index), testdata, False)
+                    load_and_check(testdata['url'], hostname, rndr_engine, str(ss_index), testdata, False, file_desc)
 
         if has_bug_data:
             if len(compsteps) > 0:
