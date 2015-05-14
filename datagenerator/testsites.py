@@ -6,7 +6,8 @@ dirname = 'c:\\mozilla\\testing\\test\\'
 scriptdir = os.path.dirname(os.path.realpath(__file__)) + os.path.sep
 filename = dirname + 'sites.txt'
 DB_SERVER = 'http://compatdataviewer.com.paas.allizom.org/data/'
-DB_SERVER = 'http://localhost:8000/data/'
+# DB_SERVER = 'http://localhost:8000/data/' # for local testing..
+AWCY_DATA_URL = 'http://arewecompatibleyet.com/data/' # for reading lists from AWCY - json files live here
 start_at = 0
 run_until = None
 manual_complete_test = False
@@ -25,6 +26,8 @@ parser.add_argument("-i", dest='index', type=int, help="the index in the list of
 parser.add_argument("-s", dest='start_at', type=int, help="start at a certain index in list, 0-based", default=0)
 parser.add_argument("-m", dest='manual', type=int, help="pass -m 1 to only proceed to next site on manual input", default=0)
 parser.add_argument("-r", dest='replay_file', type=str, help="pass -r file.json to use 'replay data' from file", default=None)
+parser.add_argument("-a", dest='awcy_list', type=str, help="pass -a jp50 to run through the 'jp50' list on AWCY", default=None)
+parser.add_argument("-o", dest='output_dir', type=str, help="path to dir where results should be saved - remember final slash!", default=None)
 args = parser.parse_args()
 if args.index:
     start_at = args.index
@@ -35,6 +38,16 @@ if args.manual is 1:
     manual_complete_test = True
 if args.replay_file:
     replay_data = read_json_file(args.replay_file)
+if args.output_dir:
+    dirname = args.output_dir
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+if args.awcy_list: # download data from AWCY, write sites.txt
+    awcy_url = "%s%s.json" % (AWCY_DATA_URL, args.awcy_list)
+    req = requests.get(awcy_url)
+    f = open("%ssites.txt" % dirname, 'w')
+    f.write('\n'.join(json.loads(req.text)['data']))
+    f.close()
 
 if not os.path.exists(dirname+'comp'):
     os.mkdir(dirname+'comp')
@@ -396,12 +409,12 @@ def clickElm(marionette_instance, elm):
     else:
         marionette_instance.execute_script('arguments[0].click()', [elm])
 
-def save_data_to_db(domain_name, testdata_fx, testdata_wk):
+def save_data_to_db(domain_name, url, testdata_fx, testdata_wk):
     destination_url = '%s%s' % (DB_SERVER, domain_name)
     file_desc = testdata_fx['file_desc']
     file_desc.update(testdata_wk['file_desc'])
     multiple_files = []
-    data = {testdata_fx['uastring']:{'gecko':{'plugin_results':{}}},testdata_wk['uastring']:{'gecko':{'plugin_results':{}}}}
+    data = {testdata_fx['uastring']:{'gecko':{'plugin_results':{}}},testdata_wk['uastring']:{'gecko':{'plugin_results':{}}}, "initial_url": url}
     for prop in testdata_fx:
         if prop in ['uastring', 'file_desc', 'engine', 'final_url']:
             continue
@@ -472,7 +485,7 @@ with open(filename, 'r') as handle:
                 spoof_safari_ios()
                 wkresults = load_and_check(url, hostname, 'wk-spoof')
                 #print('AppleWebKit spof results', wkresults)
-                save_data_to_db(hostname, fxresults, wkresults)
+                save_data_to_db(hostname, url, fxresults, wkresults)
             except Exception, e:
                 traceback.print_exc()
                 print(e)
