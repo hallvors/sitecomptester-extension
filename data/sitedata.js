@@ -1719,7 +1719,7 @@ var bugdata = {
     "1005135": {
         "url": "http://soychile.cl",
         "steps": [
-            function(){return mobileLinkOrScriptUrl();}
+            function(){return mobileLinkOrScriptUrl() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "soychile.cl sends desktop site to Firefox OS"
@@ -2401,7 +2401,7 @@ var bugdata = {
     "993851": {
         "url": "http://commonfloor.com",
         "steps": [
-            function(){return hasViewportMeta();}
+            function(){return hasViewportMeta() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "commonfloor.com sends desktop site to Firefox OS"
@@ -6015,14 +6015,15 @@ var automated_tests={
         "ua": "FirefoxOS",
         "title": "alibaba.com sends desktop site to Firefox OS"
     },
-    "937472": {
+    /* the bomnegocio site seems bought by olx */
+    /*"937472": {
         "url": "http://www.bomnegocio.com/",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.bomnegocio.com" && mobileLinkOrScriptUrl();}
+            function(){return hasViewportMeta() && location.hostname === "m.bomnegocio.com";}
         ],
         "ua": "FirefoxOS",
         "title": "bomnegocio.com doesn't recognize B2G UA as mobile"
-    },
+    },*/
     "945430": {
         "url": "http://ups.com",
         "steps": [
@@ -6808,7 +6809,7 @@ var automated_tests={
     "967066": {
         "url": "http://www.ndtv.com",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.ndtv.com" && mobileLinkOrScriptUrl();}
+            function(){return hasViewportMeta() && location.hostname === "m.ndtv.com" && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "ndtv.com sends desktop version to Firefox OS"
@@ -7106,7 +7107,7 @@ var automated_tests={
     "972368": {
         "url": "http://zalando.no",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.zalando.no";}
+            function(){return hasViewportMeta() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "zalando.no sends desktop site to Firefox OS"
@@ -7156,7 +7157,7 @@ var automated_tests={
         "steps": [
             function(){return hasViewportMeta();}
         ],
-        "mobNavElm": "img.bar__logo-img",
+        "mobNavElm": "button.btn.btn--menu",
         "ua": "FirefoxOS",
         "title": "abcnyheter.no sends desktop site to Firefox OS"
     },
@@ -7276,7 +7277,8 @@ var automated_tests={
     "978090": {
         "url": "http://bancochile.cl",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "www.bancamovil.bancochile.cl";}
+            function(){ if(typeof dSmartphone === 'function')return dSmartphone(); }/*,
+            function(){return hasViewportMeta() && pageWidthFitsScreen();}*/
         ],
         "ua": "FirefoxOS",
         "title": "bancochile.cl sends desktop site to Firefox OS"
@@ -7479,7 +7481,12 @@ var automated_tests={
     "982021": {
         "url": "http://balkanweb.com/site/",
         "steps": [
-            function(){return location.hostname === "balkanweb.com";}
+            function(){ // the real problem with this overlay ad: it's wider than the screen
+                if(document.querySelector('button.ui-button[title="Close"]')){
+                    document.querySelector('button.ui-button[title="Close"]').click();
+                }
+            },
+            function(){return pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "balkanweb.com has broken layout in Firefox OS"
