@@ -5,8 +5,8 @@ import pdb
 dirname = 'c:\\mozilla\\testing\\test\\'
 scriptdir = os.path.dirname(os.path.realpath(__file__)) + os.path.sep
 filename = dirname + 'sites.txt'
-DB_SERVER = 'http://compatdataviewer.com.paas.allizom.org/data/'
-# DB_SERVER = 'http://localhost:8000/data/' # for local testing..
+DB_SERVER = 'http://compatentomology.com.paas.allizom.org/data/'
+#DB_SERVER = 'http://localhost:8000/data/' # for local testing..
 AWCY_DATA_URL = 'http://arewecompatibleyet.com/data/' # for reading lists from AWCY - json files live here
 start_at = 0
 run_until = None
@@ -42,10 +42,12 @@ if args.output_dir:
     dirname = args.output_dir
     if not os.path.exists(dirname):
         os.mkdir(dirname)
+    filename = dirname + 'sites.txt'
 if args.awcy_list: # download data from AWCY, write sites.txt
     awcy_url = "%s%s.json" % (AWCY_DATA_URL, args.awcy_list)
+    print(awcy_url)
     req = requests.get(awcy_url)
-    f = open("%ssites.txt" % dirname, 'w')
+    f = open(filename, 'w')
     f.write('\n'.join(json.loads(req.text)['data']))
     f.close()
 
@@ -414,7 +416,7 @@ def save_data_to_db(domain_name, url, testdata_fx, testdata_wk):
     file_desc = testdata_fx['file_desc']
     file_desc.update(testdata_wk['file_desc'])
     multiple_files = []
-    data = {testdata_fx['uastring']:{'gecko':{'plugin_results':{}}},testdata_wk['uastring']:{'gecko':{'plugin_results':{}}}, "initial_url": url}
+    data = {testdata_fx['uastring']:{'gecko':{'plugin_results':{}}},testdata_wk['uastring']:{'gecko':{'plugin_results':{}}}}
     for prop in testdata_fx:
         if prop in ['uastring', 'file_desc', 'engine', 'final_url']:
             continue
@@ -431,6 +433,7 @@ def save_data_to_db(domain_name, url, testdata_fx, testdata_wk):
         del file_desc[filename]['full_path'] # don't leak local directory paths onto the internet..
 
     post_data = {}
+    post_data['initial_url'] = url
     post_data['data'] = json.dumps(data)
     post_data['file_desc'] = json.dumps(file_desc)
     print('about to send data to %s' % destination_url)
