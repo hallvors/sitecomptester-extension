@@ -2,6 +2,8 @@ phantom.injectJs('data/sitedata.js');
 
 var testsFile = 'http://arewecompatibleyet.com/js/stdTests.js';
 var testsFile = 'http://hallvord.com/temp/moz/stdTests.js';
+var compatentomologyURL = 'http://compatentomology.com.paas.allizom.org/data/';
+var compatentomologyURL = 'http://localhost:8000/data/';
 var date = new Date();
 var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
 var results=[];
@@ -59,18 +61,7 @@ function nextBug () {
 //	console.log(JSON.stringify(bugdata[bugs[bugIdx]]))
 	currentTest=0;
 	bug = bugs[bugIdx];
-	// tmp: run only xhr bugs
-	/*
-	while(bugdata[bug].testType != 'xhr'){
-		if (bugIdx<bugs.length-1) {
-			bugIdx++; bug = bugs[bugIdx];
-		}else{
-			phantom.quit()
-		}
-	}*/
-	// end tmp: run only xhr bugs
 	if(bugIdx >= bugs.length || ! bug in bugdata){
-		//page.open('data:text/html,<html><body><form method="post" action="http://arewecompatibleyet.hallvord.com/data/testing/upload.php"><input type=submit><textarea style="visibility:hidden" name="csvdata">'+encodeURIComponent(csvStr)+'</textarea></form><pre>'+encodeURIComponent(csvStr));
 		console.log('Done. Results were written to '+outfile)
 	}else if (bugdata[bug]) {
 		ua = page.settings.userAgent = uadata[bugdata[bug].ua]['general.useragent.override'];
@@ -97,10 +88,10 @@ function loadSite(){
 		if (page.url.indexOf(bugdata[bug].url)>-1) { // we're not done loading, but let's try to run those tests anyway..
 			runTestStep();
 		}else{
-			registerTestResult('TIMEOUT - page did not load');
+			registerTestResult(page, 'TIMEOUT - page did not load');
 			nextBug();
 		}
-	}, 60000); // backup timeout in case we get stuck at some point..
+	}, 90000); // backup timeout in case we get stuck at some point..
 	console.log('Now opening '+bugdata[bug].url)
 	page.open(bugdata[bug].url, function (status) {
 		if(status == 'success'){
@@ -120,7 +111,7 @@ function loadSite(){
 			// for some reason you might get a "fail" message even though the page will load fine eventually..
 			// why? and what to do about it??
 			console.log('Failed to load site for '+bug+' '+bugdata[bug].url);
-			registerTestResult(false, 'Site failed to load: '+status); // Sites fail due to for example redirect problems, better label them as failures..
+			registerTestResult(page, false, 'Site failed to load: '+status); // Sites fail due to for example redirect problems, better label them as failures..
 			bugIdx++;
 			jobTime(nextBug,10); // move on
 		}*/
@@ -130,7 +121,7 @@ var retryCount=0
 function runTestStep () {
 	jobTime(nextBug, 30000); // backup timeout in case we get stuck at some point..
 	if(xhrTestUrl || bugdata[bug].testType === 'mixed-content-blocking')return; // handled elsewhere..
-	if(page.title === 'Page Load Error')return registerTestResult(false); // assume failure for loading errors (and fail early because
+	if(page.title === 'Page Load Error')return registerTestResult(page, false, page.title); // assume failure for loading errors (and fail early because
 		//sometimes we're not allowed to inject JS into the error document)
 	if (page.evaluateJavaScript('typeof hasViewportMeta === "function"')) {
 		if (bugdata[bug] && bugdata[bug].steps.length>currentTest) {
@@ -149,7 +140,7 @@ function runTestStep () {
 						retryCount++
 						return;
 					}else{
-						registerTestResult('TIMEOUT - page ready test failed after 10 attempts');
+						registerTestResult(page, 'TIMEOUT - page ready test failed after 10 attempts');
 						return;
 					}
 				}
@@ -173,12 +164,12 @@ function runTestStep () {
 							result += (elmtestresult ? ', mobNavElm was found' : ', mobNavElm was NOT found');
 						}
 					};
-					registerTestResult(result);
+					registerTestResult(page, result);
 					jobTime(nextBug, 10);
 				}
 			}catch(e){
 				result = e;
-				registerTestResult(result);
+				registerTestResult(page, result);
 				jobTime(nextBug, 10);
 			}
 		};
@@ -197,12 +188,71 @@ function runTestStep () {
         return ('0'+num).slice(-2);
     }
 
-function registerTestResult (result, comment) {
+function registerTestResult (page, result, comment) {
 	if(bugdata[bug]){
 		console.log(bug+' result: '+result+' '+(bugdata[bug].title||'')+' '+(comment||''));
 		results.push([bug, datetime(), ua, result, bugdata[bug].title, comment]);
 	}
 	writeResultsToFile();
+	// This is a good place to save results to a database
+	// "regression_results": [ "ua", "engine", "bug_id", "result", "screenshot"]
+	var engine = typeof slimer === 'object' ? 'gecko' : 'webkit';
+	var hostname = page.evaluateJavaScript('location.hostname');
+	var dataForDb = {};
+	dataForDb[ua] = {}
+	dataForDb[ua][engine] = {'regression_results':[{'bug_id':bug, 'result':result, 'screenshot':bug+'.png'}]}
+	dataForDb[ua][engine]['plugin_results'] = {
+	'hasHandheldFriendlyMeta': 'not run',
+	'hasViewportMeta': 'not run',
+	'hasMobileOptimizedMeta': 'not run',
+	'mobileLinkOrScriptUrl': 'not run',
+	'hasVideoTags': 'not run',
+	'pageWidthFitsScreen': 'not run',
+	'hasHtmlOrBodyMobileClass': 'not run',
+	};
+	dataForDb[ua][engine]['final_url'] = page.url
+	for(var method in dataForDb[ua][engine]['plugin_results']){
+		dataForDb[ua][engine]['plugin_results'][method] = page.evaluateJavaScript(method+'()');
+	}
+	dataForDb[ua][engine]['plugin_results']['hostname'] = hostname
+	var boundarystr = '---------------------------320463146330585';
+	var conf = {operation:'post', data:'', headers:{'Content-Type': 'multipart/form-data; boundary=' + boundarystr}}
+	conf.data = '--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="initial_url"\r\n\r\n';
+	conf.data += bugdata[bug].url + '\r\n';
+	conf.data = '--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="data"\r\n\r\n';
+	conf.data += JSON.stringify(dataForDb)
+	// now we want a screenshot..
+	var file_desc = {}
+	file_desc[bug+'.png'] = {ua:ua, engine:engine, title:'bug ' + bug + ' regression test'}
+	conf.data += '\r\n--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="file_desc"\r\n\r\n';
+	conf.data += JSON.stringify(file_desc)
+	//page.render(bug + '.png')
+	conf.data += '\r\n--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="screenshot"; filename="' + bug + '.png"\r\nContent-Type: image/png\r\n\r\n';
+	conf.data += atob(page.renderBase64())
+	conf.data += '\r\n--' + boundarystr + '--\r\n'
+	conf.headers['Content-Length'] = conf.data.length;
+	// TODO: send JS errors?
+	// Now we want to send dataForDb, file_desc and screenshot..
+	page.openUrl(compatentomologyURL + hostname, conf, null, function(){
+		jobTime(nextBug, 10);
+	});
+
+	// TODO: use http://docs.slimerjs.org/current/api/webpage.html#openurl-url-httpconf-settings-callback
+	// to POST directly rather than manipulating a form?
+	/*page.open(compatentomologyURL, function(status){
+		console.log('reporting URL callback ' + status);
+		page.evaluateJavaScript('document.forms[0].action = document.forms[0].action.replace(/\\/data\\/.+/, "/data/' + hostname + '") ');
+		page.evaluateJavaScript('console.log(document.forms[0].action)');
+		page.evaluate(function(data, file_desc){
+			console.log('setting form values');
+			document.forms[0]['data'].value = JSON.stringify(data);
+			document.forms[0]['file_desc'].value = JSON.stringify(file_desc);
+		}, dataForDb, file_desc);
+		page.uploadFile('input[type=file]', bug + '.png');
+		page.evaluate('console.log("submit");document.forms[0].submit();');
+		jobTime(nextBug, 10);
+	});*/
+
 }
 
 function writeResultsToFile(){
@@ -266,7 +316,7 @@ function createPage(){
 
 	page.onResourceError = function (res) {
 		var desc = 'resource error - received: '+res.url+'\n '+res.contentType;
-	    console.log('received: ' + desc);
+	    //console.log('received: ' + desc);
 	    if(/http:\/\//.test(res.url)){
 	    	//console.log('HTTP URL! '+res.url);
 			httpResources.push(res.url);
@@ -279,9 +329,9 @@ function createPage(){
 	    var result;
 		if(/application\/vnd\.wap(\.xhtml\+xml|\.wml|)/i.test(res.contentType)){
 			console.log('WAP! FAILURE!')
-			registerTestResult(false, 'WAP content');
+			registerTestResult(page, false, 'WAP content');
 			page.stop()
-			jobTime(nextBug, 5);
+			jobTime(nextBug, 5500);
 		}else if(xhrTestUrl && res.url === xhrTestUrl){
 			if (res.status == 200 && res.body === '' && ! ('contentType' in res)) {
 				// walks like a WAP, quacks like a WAP
@@ -292,8 +342,8 @@ function createPage(){
 				console.log(JSON.stringify(obj, null,2))
 				result = bugdata[bug].steps[0](obj); // typically calls noWapContentPlease ..
 			}
-			registerTestResult(result, 'header check complete');
-			jobTime(nextBug, 10);
+			registerTestResult(page, result, 'header check complete');
+			jobTime(nextBug, 5500);
 		}else if(/http:\/\//.test(res.url)){
 			httpResources.push(res.url);
 	    	//console.log('HTTP URL! '+res.url);
@@ -308,19 +358,19 @@ function createPage(){
 		if(xhrTestUrl){
 			if(page.content === '<html><head></head><body></body></html>'){
 				// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
-				registerTestResult(false, 'WAP content (empty page)');
-				jobTime(nextBug, 10);
+				registerTestResult(page, false, 'WAP content (empty page)');
+				jobTime(nextBug, 5500);
 			}else{
 				//console.log(page.content)
-				registerTestResult(true, 'no WAP here, right?!');
+				registerTestResult(page, true, 'no WAP here, right?!');
 				xhrTestUrl = '';
 				// if next page is XHR, loading appears to fail *and* we'd see the source of the previous page.. Hence, load about:blank first
 				page.open('about:blank');
-				jobTime(nextBug, 10);
+				jobTime(nextBug, 5500);
 			}
 		}else if(bugdata[bug].testType === 'mixed-content-blocking'){
 			setTimeout(function(){
-				registerTestResult(!httpResources.length,  (httpResources.length ? httpResources.length + ' http: resources loaded on this https: page' : ''));
+				registerTestResult(page, !httpResources.length,  (httpResources.length ? httpResources.length + ' http: resources loaded on this https: page' : ''));
 				nextBug();
 			}, 2000)
 		}else{
