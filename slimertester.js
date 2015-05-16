@@ -3,7 +3,7 @@ phantom.injectJs('data/sitedata.js');
 var testsFile = 'http://arewecompatibleyet.com/js/stdTests.js';
 var testsFile = 'http://hallvord.com/temp/moz/stdTests.js';
 var compatentomologyURL = 'http://compatentomology.com.paas.allizom.org/data/';
-var compatentomologyURL = 'http://localhost:8000/data/';
+// var compatentomologyURL = 'http://localhost:8000/data/'; // local testing
 var date = new Date();
 var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
 var results=[];
