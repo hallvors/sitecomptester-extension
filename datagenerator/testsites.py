@@ -1,5 +1,6 @@
 from marionette import Marionette
 import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse, glob, requests, traceback
+
 import pdb
 
 dirname = 'c:\\mozilla\\testing\\test\\'
@@ -65,6 +66,7 @@ Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT\"""")
 m = Marionette(host='localhost', port=2828)
 m.start_session()
 m.set_search_timeout(1000)
+setup_console_logging(m)
 file_index = []
 
 def set_mozilla_pref(marionette_instance, name, value):
@@ -115,7 +117,52 @@ def spoof_android_browser():
     set_mozilla_pref(m, 'general.useragent.vendor', 'Google Inc.')
     set_mozilla_pref(m, 'general.useragent.platform', 'Linux armv71')
 
-def inject_js():
+def setup_console_logging(marionette_instance):
+    marionette_instance.set_context(marionette_instance.CONTEXT_CHROME)
+    marionette_instance.execute_script("""window.consoleMessages = [];
+var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+var theConsoleListener = {
+   observe:function( aMessage ) {   testMsg.push(aMessage);  },
+    QueryInterface: function (iid) {
+    if (!iid.equals(Components.interfaces.nsIConsoleListener) &&
+            !iid.equals(Components.interfaces.nsISupports)) {
+        throw Components.results.NS_ERROR_NO_INTERFACE;
+        }
+        return this;
+    }
+};
+
+var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"]
+        .getService(Components.interfaces.nsIConsoleService);
+    aConsoleService.registerListener(theConsoleListener);
+ """)
+    marionette_instance.set_context(marionette_instance.CONTEXT_CONTENT)
+
+def get_and_empty_console_log(marionette_instance):
+    marionette_instance.set_context(marionette_instance.CONTEXT_CHROME)
+    console_data = marionette_instance.execute_script("""
+var cm = window.consoleMessages;
+window.consoleMessages = [];
+return cm;
+    """)
+    marionette_instance.set_context(marionette_instance.CONTEXT_CONTENT)
+    # The console data comes in a somewhat messy format -
+    # the 'message' string contains all the data we're interested in
+    # but it takes some parsing to actually get it..
+    outdata = []
+    rx=re.compile(': "(.+)" \{file: "(.+)" line: (\d+) column: (\d+) source: "(.+)"\}', re.DOTALL)
+    for error in console_data:
+        try:
+            match = re.search(rx, error['message'])
+            if match:
+                outdata.push({'message': match.group(1) + ' - ' + match.group(5), 'stack':m.group(2) + ':' + m.group(3) + ':' + m.group(4)})
+        except Exception,e:
+            print('WARNING: exception when parsing console data with regexp')
+            print error['message']
+            print(e)
+    return outdata
+
+def inject_js(m):
     m.set_context(m.CONTEXT_CONTENT)
     js = """o={hasHandheldFriendlyMeta: false, hasViewportMeta: false, hasMobileOptimizedMeta:false,
         mobileLinkOrScriptUrl: false, hasVideoTags:false, pageWidthFitsScreen: false, hasHtmlOrBodyMobileClass: false}
@@ -258,7 +305,7 @@ def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, c
     if rndr_engine:
         rndr_engine = rndr_engine +'-'
     fname = dirname+rndr_engine+("%03d-"%i)+hostname + sub_test_id + '.png'
-    check_results = json.loads(inject_js())
+    check_results = json.loads(inject_js(m))
     check_results['file_desc'] = {os.path.basename(fname): {'full_path': fname,  'engine': 'gecko', 'ua': check_results['uastring']}}
     title_map[fname] = ''
     if 'title' in testdata:
@@ -270,6 +317,7 @@ def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, c
     if 'inject_js_after' in testdata:
         m.execute_script(testdata['inject_js_after'])
     check_results['final_url'] = m.get_url()
+    check_results['console_log'] = get_and_empty_console_log(m)
     return check_results
 
 def try_login(marionette_instance, hostname, extra_delay_time):
