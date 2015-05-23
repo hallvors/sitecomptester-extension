@@ -9,6 +9,7 @@ filename = dirname + 'sites.txt'
 DB_SERVER = 'http://compatentomology.com.paas.allizom.org/data/'
 #DB_SERVER = 'http://localhost:8000/data/' # for local testing..
 AWCY_DATA_URL = 'http://arewecompatibleyet.com/data/' # for reading lists from AWCY - json files live here
+ENABLE_SPECIAL_SCREENSHOTS = False
 start_at = 0
 run_until = None
 manual_complete_test = False
@@ -98,7 +99,13 @@ def spoof_firefox_os():
     set_mozilla_pref(m, 'general.useragent.platform', '')
 
 def spoof_firefox_android():
-    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Android; Mobile; rv:32.0) Gecko/32.0 Firefox/32.0')
+    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Android; Mobile; rv:38.0) Gecko/38.0 Firefox/38.0')
+    set_mozilla_pref(m, 'general.useragent.appName', 'Netscape')
+    set_mozilla_pref(m, 'general.useragent.vendor', 'Mozilla')
+    set_mozilla_pref(m, 'general.useragent.platform', '')
+
+def spoof_firefox_android_device_id():
+    set_mozilla_pref(m, 'general.useragent.override', 'Mozilla/5.0 (Android 4.4.4; Mobile; SH-01G Build/S4020; rv:38.0) Gecko/38.0 Firefox/38.0')
     set_mozilla_pref(m, 'general.useragent.appName', 'Netscape')
     set_mozilla_pref(m, 'general.useragent.vendor', 'Mozilla')
     set_mozilla_pref(m, 'general.useragent.platform', '')
@@ -533,7 +540,7 @@ with open(filename, 'r') as handle:
                 fxresults = load_and_check(url, hostname, '')
                 #print('firefox spoof results: ', fxresults)
                 empty_firefox_cache(m)
-                spoof_safari_ios()
+                spoof_firefox_android_device_id()
                 wkresults = load_and_check(url, hostname, 'wk-spoof')
                 #print('AppleWebKit spof results', wkresults)
                 save_data_to_db(hostname, url, fxresults, wkresults)
@@ -570,7 +577,7 @@ with open(filename, 'r') as handle:
         # This might be a suitable place to hack in *sub*tests
         # i.e. tests described in a domain-specific list of "other" stuff
         # Screenshots only, or should these affect site status?
-        if hostname in special_screenshots:
+        if hostname in special_screenshots and ENABLE_SPECIAL_SCREENSHOTS:
             for ss_index,testdata in enumerate(special_screenshots[hostname]):
                 for rndr_engine in ['', 'wk-spoof']:
                     empty_firefox_cache(m)
