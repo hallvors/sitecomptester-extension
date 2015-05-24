@@ -64,11 +64,6 @@ if not os.path.exists(dirname+'comp/.htaccess'):
 Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT\"""")
     f.close()
 
-m = Marionette(host='localhost', port=2828)
-m.start_session()
-m.set_search_timeout(1000)
-setup_console_logging(m)
-file_index = []
 
 def set_mozilla_pref(marionette_instance, name, value):
     marionette_instance.set_context(marionette_instance.CONTEXT_CHROME)
@@ -127,9 +122,10 @@ def spoof_android_browser():
 def setup_console_logging(marionette_instance):
     marionette_instance.set_context(marionette_instance.CONTEXT_CHROME)
     marionette_instance.execute_script("""window.consoleMessages = [];
+if(window._consoleListenerAdded)return;
 var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 var theConsoleListener = {
-   observe:function( aMessage ) {   testMsg.push(aMessage);  },
+   observe:function( aMessage ) {   window.consoleMessages.push(aMessage);  },
     QueryInterface: function (iid) {
     if (!iid.equals(Components.interfaces.nsIConsoleListener) &&
             !iid.equals(Components.interfaces.nsISupports)) {
@@ -142,10 +138,11 @@ var theConsoleListener = {
 var aConsoleService = Components.classes["@mozilla.org/consoleservice;1"]
         .getService(Components.interfaces.nsIConsoleService);
     aConsoleService.registerListener(theConsoleListener);
+    window._consoleListenerAdded = true;
  """)
     marionette_instance.set_context(marionette_instance.CONTEXT_CONTENT)
 
-def get_and_empty_console_log(marionette_instance):
+def get_and_empty_console_log(marionette_instance, results):
     marionette_instance.set_context(marionette_instance.CONTEXT_CHROME)
     console_data = marionette_instance.execute_script("""
 var cm = window.consoleMessages;
@@ -156,18 +153,29 @@ return cm;
     # The console data comes in a somewhat messy format -
     # the 'message' string contains all the data we're interested in
     # but it takes some parsing to actually get it..
-    outdata = []
-    rx=re.compile(': "(.+)" \{file: "(.+)" line: (\d+) column: (\d+) source: "(.+)"\}', re.DOTALL)
+    print(len(console_data))
+    print(console_data)
+    if 'js_problems' not in results:
+        results['js_problems'] = []
+    if 'css_problems' not in results:
+        results['css_problems'] = []
+    rx_message = re.compile(': "(.+)" \{file: "(.+)" line: (\d+) column: (\d+) source: "(.+)"\}', re.DOTALL)
+    rx_propval = re.compile('([\w-]+)\s*:\s*(.+)')
     for error in console_data:
+        if 'character encoding of the HTML document' in error['message']:
+            continue
         try:
-            match = re.search(rx, error['message'])
+            match = re.search(rx_message, error['message'])
             if match:
-                outdata.push({'message': match.group(1) + ' - ' + match.group(5), 'stack':m.group(2) + ':' + m.group(3) + ':' + m.group(4)})
+                if 'Error in parsing value' in error['message']:
+                    match2 = re.search(rx_propval, match.group(5))
+                    results['css_problems'].append({'file':match.group(2) + ':' + match.group(3) + ':' + match.group(4), 'property': match2.group(1), 'value': match2.group(2), 'selector': None})
+                else:
+                    results['js_problems'].append({'message': match.group(1) + ' - ' + match.group(5), 'stack':match.group(2) + ':' + match.group(3) + ':' + match.group(4)})
         except Exception,e:
             print('WARNING: exception when parsing console data with regexp')
             print error['message']
             print(e)
-    return outdata
 
 def inject_js(m):
     m.set_context(m.CONTEXT_CONTENT)
@@ -324,7 +332,7 @@ def load_and_check(url, hostname, rndr_engine='', sub_test_id='', testdata={}, c
     if 'inject_js_after' in testdata:
         m.execute_script(testdata['inject_js_after'])
     check_results['final_url'] = m.get_url()
-    check_results['console_log'] = get_and_empty_console_log(m)
+    get_and_empty_console_log(m, check_results)
     return check_results
 
 def try_login(marionette_instance, hostname, extra_delay_time):
@@ -475,18 +483,28 @@ def save_data_to_db(domain_name, url, testdata_fx, testdata_wk):
     for prop in testdata_fx:
         if prop in ['uastring', 'file_desc', 'engine', 'final_url']:
             continue
+        # errors from error console are not where we want them..
+        if prop in ['css_problems', 'js_problems']:
+            data[testdata_fx['uastring']]['gecko'][prop] = testdata_fx[prop]
+            continue
         data[testdata_fx['uastring']]['gecko']['plugin_results'][prop] = testdata_fx[prop]
+    del testdata_fx['css_problems']
+    del testdata_fx['js_problems']
     data[testdata_fx['uastring']]['gecko']['final_url'] = testdata_fx['final_url']
     for prop in testdata_wk:
         if prop in ['uastring', 'file_desc', 'engine', 'final_url']:
             continue
+        if prop in ['css_problems', 'js_problems']:
+            data[testdata_wk['uastring']]['gecko'][prop] = testdata_wk[prop]
+            continue
         data[testdata_wk['uastring']]['gecko']['plugin_results'][prop] = testdata_wk[prop]
+    del testdata_wk['css_problems']
+    del testdata_wk['js_problems']
     data[testdata_wk['uastring']]['gecko']['final_url'] = testdata_wk['final_url']
     multiple_files = []
     for filename in file_desc:
         multiple_files.append(('screenshot',(os.path.basename(filename),open(file_desc[filename]['full_path'], 'rb'), 'image/png')))
         del file_desc[filename]['full_path'] # don't leak local directory paths onto the internet..
-
     post_data = {}
     post_data['initial_url'] = url
     post_data['data'] = json.dumps(data)
@@ -495,6 +513,11 @@ def save_data_to_db(domain_name, url, testdata_fx, testdata_wk):
     req = requests.post(destination_url, files=multiple_files, data=post_data)
     #print(req.text)
 
+m = Marionette(host='localhost', port=2828)
+m.start_session()
+m.set_search_timeout(1000)
+setup_console_logging(m)
+file_index = []
 
 i=0
 has_bug_data = False
