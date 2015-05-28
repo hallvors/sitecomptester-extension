@@ -161,15 +161,23 @@ return cm;
         results['css_problems'] = []
     rx_message = re.compile(': "(.+)" \{file: "(.+)" line: (\d+) column: (\d+) source: "(.+)"\}', re.DOTALL)
     rx_propval = re.compile('([\w-]+)\s*:\s*(.+)')
+    rx_propval_alternate = re.compile('in parsing value for ["\'](.+)["\'].*source: "(.+)"')
     for error in console_data:
         if 'character encoding of the HTML document' in error['message']:
             continue
         try:
             match = re.search(rx_message, error['message'])
+            print(error['message'])
             if match:
-                if 'Error in parsing value' in error['message']:
+                if 'Error in parsing value' in error['message'] or 'Declaration dropped.' in error['message'] or 'Skipped to next declaration.' in error['message']:
                     match2 = re.search(rx_propval, match.group(5))
-                    results['css_problems'].append({'file':match.group(2) + ':' + match.group(3) + ':' + match.group(4), 'property': match2.group(1), 'value': match2.group(2), 'selector': None})
+                    if match2:
+                        results['css_problems'].append({'file':match.group(2) + ':' + match.group(3) + ':' + match.group(4), 'property': match2.group(1), 'value': match2.group(2), 'selector': None})
+                    else:
+                        # propval regexp failed with this string. Source part
+                        # does not have property:value format
+                        match2 = re.search(rx_propval_alternate, error['message'])
+                        results['css_problems'].append({'file':match.group(2) + ':' + match.group(3) + ':' + match.group(4), 'property': match2.group(1), 'value': match2.group(2), 'selector': None})
                 else:
                     results['js_problems'].append({'message': match.group(1) + ' - ' + match.group(5), 'stack':match.group(2) + ':' + match.group(3) + ':' + match.group(4)})
         except Exception,e:
@@ -511,7 +519,7 @@ def save_data_to_db(domain_name, url, testdata_fx, testdata_wk):
     post_data['file_desc'] = json.dumps(file_desc)
     print('about to send data to %s' % destination_url)
     req = requests.post(destination_url, files=multiple_files, data=post_data)
-    #print(req.text)
+    print("Posted to DB server, response: %s" % req.text)
 
 m = Marionette(host='localhost', port=2828)
 m.start_session()
