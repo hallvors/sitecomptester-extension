@@ -4264,11 +4264,6 @@ var automated_tests={
 		 ua: "FirefoxOS",
 		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
 	},
-	"888203" : {
-		url: 'http://es.wikia.com/Wikia',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasHandheldFriendlyMeta() && hasMobileOptimizedMeta() && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
-	},
 	"843170" : {
 		url: 'http://etsy.com',
 		 ua: "FirefoxOS",
@@ -4348,11 +4343,6 @@ var automated_tests={
 		url: 'http://hao123.com',
 		 ua: "FirefoxOS",
 		steps:[function(){return location.hostname.indexOf("m.hao123.com")>-1 && hasViewportMeta()}]
-	},
-	"888203" : {
-		url: 'http://harrypotter.wikia.com/',
-		 ua: "FirefoxOS",
-		steps:[function(){return hasHandheldFriendlyMeta() && hasMobileOptimizedMeta() && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
 /*	"878640" : {
 		url: 'http://hootsuite.com',
