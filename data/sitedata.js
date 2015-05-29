@@ -5896,7 +5896,7 @@ var automated_tests={
     "960031": {
         "url": "http://pnet.co.za",
         "steps": [
-            function(){return location.hostname === "m.pnet.co.za";}
+            function(){return pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "pnet.co.za does not offer mobile site to Firefox OS"
