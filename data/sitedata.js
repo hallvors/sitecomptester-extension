@@ -5398,7 +5398,7 @@ var automated_tests={
         "url": "http://www.hulu.com",
         /* Note: locales matter for this site.. Doesn't serve videos everywhere.. */
         "steps": [
-            function(){return (hasVideoTags() && mobileLinkOrScriptUrl()) || location.pathname.indexOf('mobile')>-1;}
+            function(){return mobileLinkOrScriptUrl() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "hulu.com: Firefox OS gets desktop version"
@@ -5431,7 +5431,7 @@ var automated_tests={
     "944782": {
         "url": "http://www.weather.com/",
         "steps": [
-            function(){return location.hostname === "mw.weather.com" && mobileLinkOrScriptUrl() && hasHandheldFriendlyMeta();}
+            function(){return pageWidthFitsScreen() && hasViewportMeta() && hasHandheldFriendlyMeta();}
         ],
         "ua": "FirefoxOS",
         "title": "weather.com sends desktop content to Firefox OS"
@@ -5495,7 +5495,7 @@ var automated_tests={
     "959106": {
         "url": "http://hexin.cn",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "hexin.cn";}
+            function(){return hasViewportMeta() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "hexin.cn sends Firefox OS simplified page"
@@ -5748,7 +5748,7 @@ var automated_tests={
         "ua": "FirefoxOS",
         "testType": "xhr",
         "title": "lady.3g.net.cn sends WAP page"
-    },
+    },/*
     "957459": {
         "url": "http://novel.iask.cn",
         "steps": [
@@ -5757,7 +5757,7 @@ var automated_tests={
         "ua": "FirefoxOS",
         "testType": "xhr",
         "title": "novel.iask.cn sends WAP page"
-    },
+    },*/
     "939035": {
         "url": "http://www.beyond.com",
         "steps": [
@@ -5819,7 +5819,7 @@ var automated_tests={
     "932907": {
         "url": "http://www.makemytrip.com/",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.makemytrip.com";}
+            function(){return hasViewportMeta() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "makemytrip.com isn't redirecting to mobile site on Firefox OS"
