@@ -6275,7 +6275,7 @@ var automated_tests={
         "steps": [
             function(){return pageWidthFitsScreen();}
         ],
-        "mobNavElm": "div#push-nav-list-icon img.img-responsive",
+        "mobNavElm": "div.global-nav-list-icon div.burger",
         "ua": "FirefoxOS",
         "title": "video.adultswim.com sends desktop content to FirefoxOS"
     },
