@@ -6377,7 +6377,7 @@ var automated_tests={
         "steps": [
             function(){return hasViewportMeta();}
         ],
-        "mobNavElm":"section.micon",
+        "mobNavElm":".header a.navicon",
         "ua": "FirefoxOS",
         "title": "jagran.com isn't redirecting to mobile site on Firefox OS"
     },
