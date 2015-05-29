@@ -6484,7 +6484,7 @@ var automated_tests={
         "url": "http://us.jobrapido.com",
         "steps": [
             /* This page is transformed into a mobile page from JS */
-            function(){return mobileLinkOrScriptUrl() || document.documentElement.className.indexOf('mobile')>-1;}
+            function(){return hasViewportMeta() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
         "title": "jobrapido.com sends desktop site to Firefox OS"
