@@ -6508,8 +6508,8 @@ var automated_tests={
     },
     "964162": {
         "url": "http://www.sfr.fr/",
-        "steps": [
-            function(){return location.hostname === "m.sfr.fr";}
+        "steps": [ /* the desktop site has some video "background" effects */
+            function(){return pageWidthFitsScreen() && !hasVideoTags();}
         ],
         "ua": "FirefoxOS",
         "title": "sfr.fr is sending desktop content to Firefox OS"
