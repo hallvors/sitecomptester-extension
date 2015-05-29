@@ -7277,8 +7277,14 @@ var automated_tests={
     "978090": {
         "url": "http://bancochile.cl",
         "steps": [
-            function(){ if(typeof dSmartphone === 'function')return dSmartphone(); }/*,
-            function(){return hasViewportMeta() && pageWidthFitsScreen();}*/
+            function(){
+                if(location.pathname.indexOf('/Inicio')===-1){
+                    return 'delay-and-retry';
+                }
+            },
+            function(){
+                return hasViewportMeta() && pageWidthFitsScreen();
+            }
         ],
         "ua": "FirefoxOS",
         "title": "bancochile.cl sends desktop site to Firefox OS"
