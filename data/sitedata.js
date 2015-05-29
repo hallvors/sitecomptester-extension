@@ -5224,7 +5224,7 @@ var automated_tests={
 	},
     "804729" : {
 		url: 'http://harrypotter.wikia.com/',
-		 ua: "FirefoxOS",
+		 ua: "FirefoxAndroid",
 		steps:[function(){return hasHandheldFriendlyMeta() && hasMobileOptimizedMeta() && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
     "968073" : {
@@ -6282,7 +6282,7 @@ var automated_tests={
     "804727": {
         "url": "http://harrypotter.wikia.com/",
         "steps": [
-            function(){return hasMobileOptimizedMeta() && mobileLinkOrScriptUrl() && hasHandheldFriendlyMeta();}
+            function(){return pageWidthFitsScreen() && hasViewportMeta();}
         ],
         "ua": "FirefoxOS",
         "title": "wikia.com serves desktop content to FirefoxOS because of UA sniffing"
