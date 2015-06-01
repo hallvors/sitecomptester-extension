@@ -1639,9 +1639,10 @@ var bugdata = {
     "1002525": {
         "url": "http://www.bikeradar.com",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "m.bikeradar.com" && hasHandheldFriendlyMeta();}
+            function(){return hasViewportMeta() && pageWidthFitsScreen();}
         ],
         "ua": "FirefoxOS",
+        "mobNavElm": "a.nav-menu-btn",
         "title": "Bikeradar.com sends desktop site to Firefox OS"
     },
     "1002666": {
@@ -2882,7 +2883,7 @@ var bugdata = {
         "steps": [
             function(){return pageWidthFitsScreen()}
         ],
-        "mobNavElm": "span.ico--type-menu-white",
+        "mobNavElm": "header nav .header-menuToggle",
         "title": "mydealz.de sends desktop site to Firefox OS"
     },
     "878255" : {
