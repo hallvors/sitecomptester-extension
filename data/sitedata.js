@@ -4766,7 +4766,7 @@ var automated_tests={
 	"827668" : {
 		url: 'http://scribd.com',
 		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		steps:[function(){return pageWidthFitsScreen() && hasViewportMeta()}]
 	},
 	"884880" : {
 		url: 'http://skinnyvscurvy.com',
@@ -5186,8 +5186,8 @@ var automated_tests={
 	},
 	"804720" : {
 		url: 'http://scribd.com',
-		 ua: "FirefoxOS",
-		steps:[function(){return mobileLinkOrScriptUrl() && hasViewportMeta()}]
+		 ua: "FirefoxAndroid",
+		steps:[function(){return pageWidthFitsScreen() && hasViewportMeta()}]
 	},
     "webcompat.com/325" : {
 		url: 'http://m.wat.tv',
@@ -5197,7 +5197,7 @@ var automated_tests={
 	"900617" : {
 		url: 'http://www.despegar.com.ve/',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.despegar.com.ve")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
+		steps:[function(){return pageWidthFitsScreen() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
     "878232" : {
 		url: 'http://hazipatika.com',
@@ -5225,7 +5225,7 @@ var automated_tests={
     "804729" : {
 		url: 'http://harrypotter.wikia.com/',
 		 ua: "FirefoxAndroid",
-		steps:[function(){return hasHandheldFriendlyMeta() && hasMobileOptimizedMeta() && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
+		steps:[function(){return  pageWidthFitsScreen() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
     "968073" : {
         url: 'http://overstock.com',
@@ -5286,7 +5286,7 @@ var automated_tests={
 	"935899" : {
 		url: 'http://www.cwtv.com/cw-video/',
 		 ua: "FirefoxOS",
-		steps:[function(){return location.hostname.indexOf("m.cwtv.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
+		steps:[function(){return location.hostname.indexOf("cwtv.com")>-1 && mobileLinkOrScriptUrl() && hasViewportMeta() /*(regression test, expected to pass)*/}]
 	},
     "931919": {
         "url": "http://redplanet.gr",
@@ -5324,7 +5324,7 @@ var automated_tests={
     "931901": {
         "url": "http://www.pathfinder.gr",
         "steps": [
-            function(){return hasViewportMeta() && location.hostname === "i.pathfinder.gr";}
+            function(){return hasViewportMeta() && location.hostname === "mobile.pathfinder.gr";}
         ],
         "ua": "FirefoxOS"
     },
@@ -7268,6 +7268,7 @@ var automated_tests={
         "url": "http://bancochile.cl",
         "steps": [
             function(){
+                if(typeof dSmartphone === 'function')return dSmartphone();
                 if(location.pathname.indexOf('/Inicio')===-1){
                     return 'delay-and-retry';
                 }
