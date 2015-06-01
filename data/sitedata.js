@@ -2882,7 +2882,7 @@ var bugdata = {
         "steps": [
             function(){return pageWidthFitsScreen()}
         ],
-        "mobNavElm": "span.ico--type-menu-white",
+        "mobNavElm": "header nav .header-menuToggle",
         "title": "mydealz.de sends desktop site to Firefox OS"
     },
     "878255" : {
