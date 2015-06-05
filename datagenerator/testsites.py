@@ -1,9 +1,9 @@
 from marionette import Marionette
 import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, argparse, glob, requests, traceback
-
+from PIL import Image
 import pdb
 
-dirname = 'c:\\mozilla\\testing\\jp-V\\'
+dirname = 'c:\\mozilla\\testing\\test\\'
 scriptdir = os.path.dirname(os.path.realpath(__file__)) + os.path.sep
 filename = dirname + 'sites.txt'
 DB_SERVER = 'http://compatentomology.com.paas.allizom.org/data/'
@@ -661,14 +661,24 @@ with open(filename, 'r') as handle:
         tmp = host_from_url(url)
         for f in glob.glob(dirname + '*' + host + '*.png'): # Process all screenshots related to hostname
             f = os.path.basename(f)
-            if 'wk-spoof' in f:
+            if 'wk-spoof' in f: # we handle this screenshot when we find the corresponding one
                 continue
 
-            if os.path.exists(dirname+'wk-spoof-'+f) and os.path.exists(dirname+f) and os.path.exists("c:\\Program Files (x86)\\IrfanView"):
-                ss_a = open(dirname+f, 'rb')
-                ss_b = open(dirname+'wk-spoof-'+f, 'rb')
+            if os.path.exists(dirname+'wk-spoof-' + f) and os.path.exists(dirname + f):
+                ss_a = open(dirname + f, 'rb')
+                ss_b = open(dirname + 'wk-spoof-' + f, 'rb')
                 if diff_ratio(ss_a.read(), ss_b.read()) < 1.0:
-                    subprocess.call(["c:\\Program Files (x86)\\IrfanView\\i_view32.exe", '/panorama=(1,%s%s,%swk-spoof-%s)' % (dirname,f,dirname,f), '/convert %scomp\\%s' % (dirname,f)], bufsize=100)
+                    img1 = Image.open(dirname + f)
+                    img2 = Image.open(dirname + 'wk-spoof-' + f)
+                    new_width = img1.size[0] + img2.size[0] + 3
+                    new_height = img1.size[1] + img2.size[1]
+                    #pdb.set_trace()
+                    img_combined = Image.new(img1.mode, (new_width,new_height), '#fff')
+                    img_combined.paste(img1, (0,0,img1.size[0],img1.size[1]))
+                    # 3px black line between images
+                    img_combined.paste(Image.new(img1.mode, (3,new_height), '#000'), (img1.size[0], 0, img1.size[0] + 3, new_height))
+                    img_combined.paste(img2, (img1.size[0] + 3,0,img2.size[0] + img1.size[0] + 3,img2.size[1]))
+                    img_combined.save(dirname + 'comp' + os.path.sep + f)
                     if run_until is None: # We only want to overwrite the index if we're not doing a "partial" run..
                         if dirname+f not in title_map:
                             title_map[dirname+f] = ''
@@ -677,7 +687,8 @@ with open(filename, 'r') as handle:
                         jsf = open(dirname+'comp'+os.path.sep+'idx.js', 'w')
                         jsf.write(json.dumps(file_index, indent=4))
                         jsf.close();
-
+                ss_a.close()
+                ss_b.close()
         i+=1
         if has_bug_data:
             f = open(dirname+'sitedata-automated.js', 'w')
