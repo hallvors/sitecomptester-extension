@@ -3,11 +3,12 @@ phantom.injectJs('data/sitedata.js');
 var testsFile = 'http://arewecompatibleyet.com/js/stdTests.js';
 var testsFile = 'http://hallvord.com/temp/moz/stdTests.js';
 var compatentomologyURL = 'http://compatentomology.com.paas.allizom.org/data/';
-// var compatentomologyURL = 'http://localhost:8000/data/'; // local testing
+//var compatentomologyURL = 'http://localhost:8000/data/'; // local testing
 var date = new Date();
 var outfile = 'results-'+date.getFullYear()+'-'+leadZ(date.getMonth()+1)+'-'+leadZ(date.getDate())+'.csv';
-var results=[];
+var results = [];
 var uadata = require('data/uadata.json');
+var resultRegistered = false;
 var ua, consoleMessages = [];
 var page = createPage();
 var httpResources=[];
@@ -38,8 +39,8 @@ jobTime(nextBug, 200);
 function nextBug () {
 	if(!testHelperCode){
 		page.open(testsFile, function(status){
-			console.log(status);
-			console.log(page.plainText);
+			//console.log(status);
+			//console.log(page.plainText);
 			testHelperCode = page.evaluateJavaScript('document.getElementsByTagName("pre")[0].textContent');
 			jobTime(nextBug, 10)
 		});
@@ -83,13 +84,13 @@ function nextBug () {
 function loadSite(){
 	consoleMessages = []; // per-site, clear them before loading the next one
 	httpResources = []; // also per-site
+	resultRegistered = false;
 	jobTime(function(){
 		console.log('TIMEOUT! for '+bug);
 		if (page.url.indexOf(bugdata[bug].url)>-1) { // we're not done loading, but let's try to run those tests anyway..
 			runTestStep();
 		}else{
 			registerTestResult(page, 'TIMEOUT - page did not load');
-			nextBug();
 		}
 	}, 90000); // backup timeout in case we get stuck at some point..
 	console.log('Now opening '+bugdata[bug].url)
@@ -120,14 +121,19 @@ function loadSite(){
 var retryCount=0
 function runTestStep () {
 	jobTime(nextBug, 30000); // backup timeout in case we get stuck at some point..
-	if(xhrTestUrl || bugdata[bug].testType === 'mixed-content-blocking')return; // handled elsewhere..
+	if(resultRegistered || xhrTestUrl || bugdata[bug].testType === 'mixed-content-blocking')return; // handled elsewhere..
 	if(page.title === 'Page Load Error')return registerTestResult(page, false, page.title); // assume failure for loading errors (and fail early because
 		//sometimes we're not allowed to inject JS into the error document)
+	// some of the tests below require document.body being there
+	while(page.evaluateJavaScript('document.body === null') === true){
+		console.log('waiting for body');
+		slimer.wait(1000);
+	}
 	if (page.evaluateJavaScript('typeof hasViewportMeta === "function"')) {
 		if (bugdata[bug] && bugdata[bug].steps.length>currentTest) {
 			try{
+
 				page.evaluateJavaScript('var unsafeWindow=window;');
-				//console.log('('+bugdata[bug].steps[currentTest].toString()+')()')
 				result = page.evaluateJavaScript('try{('+bugdata[bug].steps[currentTest].toString()+')()}catch(e){"EXCEPTION: "+e}');
 				// Somewhat unexpectedly, evaluateJavaScript doesn't throw if the script throws..
 				//console.log('result now '+result)
@@ -165,12 +171,10 @@ function runTestStep () {
 						}
 					};
 					registerTestResult(page, result);
-					jobTime(nextBug, 10);
 				}
 			}catch(e){
 				result = e;
 				registerTestResult(page, result);
-				jobTime(nextBug, 10);
 			}
 		};
 	}else{
@@ -194,12 +198,19 @@ function registerTestResult (page, result, comment) {
 		results.push([bug, datetime(), ua, result, bugdata[bug].title, comment]);
 	}
 	writeResultsToFile();
+	jobTime(nextBug, 20000); // backup timeout - 20 seconds should give plenty of time to send the data
+
 	// This is a good place to save results to a database
 	// "regression_results": [ "ua", "engine", "bug_id", "result", "screenshot"]
 	var engine = typeof slimer === 'object' ? 'gecko' : 'webkit';
 	var hostname = page.evaluateJavaScript('location.hostname');
+	// some of the tests below require document.body being there
+	while(page.evaluateJavaScript('document.body === null') === true){
+		console.log('waiting for body');
+		slimer.wait(1000);
+	}
 	var dataForDb = {};
-	dataForDb[ua] = {}
+	dataForDb[ua] = {};
 	dataForDb[ua][engine] = {'regression_results':[{'bug_id':bug, 'result':result, 'screenshot':bug+'.png'}]}
 	dataForDb[ua][engine]['plugin_results'] = {
 	'hasHandheldFriendlyMeta': 'not run',
@@ -211,48 +222,37 @@ function registerTestResult (page, result, comment) {
 	'hasHtmlOrBodyMobileClass': 'not run',
 	};
 	dataForDb[ua][engine]['final_url'] = page.url
+	page.evaluateJavaScript(testHelperCode);
 	for(var method in dataForDb[ua][engine]['plugin_results']){
 		dataForDb[ua][engine]['plugin_results'][method] = page.evaluateJavaScript(method+'()');
 	}
+	//console.log(JSON.stringify(dataForDb));
 	dataForDb[ua][engine]['plugin_results']['hostname'] = hostname
 	var boundarystr = '---------------------------320463146330585';
 	var conf = {operation:'post', data:'', headers:{'Content-Type': 'multipart/form-data; boundary=' + boundarystr}}
-	conf.data = '--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="initial_url"\r\n\r\n';
+	conf.data += '--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="initial_url"\r\n\r\n';
 	conf.data += bugdata[bug].url + '\r\n';
-	conf.data = '--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="data"\r\n\r\n';
+	conf.data += '--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="data"\r\n\r\n';
 	conf.data += JSON.stringify(dataForDb)
 	// now we want a screenshot..
 	var file_desc = {}
 	file_desc[bug+'.png'] = {ua:ua, engine:engine, title:'bug ' + bug + ' regression test'}
 	conf.data += '\r\n--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="file_desc"\r\n\r\n';
 	conf.data += JSON.stringify(file_desc)
+	conf.data += '\r\n--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="js_problems"\r\n\r\n';
+	conf.data += JSON.stringify(consoleMessages)
 	//page.render(bug + '.png')
 	conf.data += '\r\n--' + boundarystr + '\r\n' + 'Content-Disposition: form-data; name="screenshot"; filename="' + bug + '.png"\r\nContent-Type: image/png\r\n\r\n';
 	conf.data += atob(page.renderBase64())
 	conf.data += '\r\n--' + boundarystr + '--\r\n'
-	conf.headers['Content-Length'] = conf.data.length;
+	//conf.headers['Content-Length'] = conf.data.length;
 	// TODO: send JS errors?
 	// Now we want to send dataForDb, file_desc and screenshot..
 	page.openUrl(compatentomologyURL + hostname, conf, null, function(){
-		jobTime(nextBug, 10);
+		jobTime(nextBug, 500);
 	});
 
-	// TODO: use http://docs.slimerjs.org/current/api/webpage.html#openurl-url-httpconf-settings-callback
-	// to POST directly rather than manipulating a form?
-	/*page.open(compatentomologyURL, function(status){
-		console.log('reporting URL callback ' + status);
-		page.evaluateJavaScript('document.forms[0].action = document.forms[0].action.replace(/\\/data\\/.+/, "/data/' + hostname + '") ');
-		page.evaluateJavaScript('console.log(document.forms[0].action)');
-		page.evaluate(function(data, file_desc){
-			console.log('setting form values');
-			document.forms[0]['data'].value = JSON.stringify(data);
-			document.forms[0]['file_desc'].value = JSON.stringify(file_desc);
-		}, dataForDb, file_desc);
-		page.uploadFile('input[type=file]', bug + '.png');
-		page.evaluate('console.log("submit");document.forms[0].submit();');
-		jobTime(nextBug, 10);
-	});*/
-
+	resultRegistered = true;
 }
 
 function writeResultsToFile(){
@@ -311,7 +311,7 @@ function createPage(){
 	page.onError = function(msg, line, source){
 		console.log('ERROR reported to slimertester.js: '+msg+' '+line+' '+source);
 		console.log(JSON.stringify(line));
-		consoleMessages.push(msg);
+		consoleMessages.push({message:msg, stack:line});
 	}
 
 	page.onResourceError = function (res) {
@@ -331,8 +331,7 @@ function createPage(){
 			console.log('WAP! FAILURE!')
 			registerTestResult(page, false, 'WAP content');
 			page.stop()
-			jobTime(nextBug, 5500);
-		}else if(xhrTestUrl && res.url === xhrTestUrl){
+		}else if(xhrTestUrl && res.url === xhrTestUrl && !resultRegistered){
 			if (res.status == 200 && res.body === '' && ! ('contentType' in res)) {
 				// walks like a WAP, quacks like a WAP
 				result = false;
@@ -343,7 +342,6 @@ function createPage(){
 				result = bugdata[bug].steps[0](obj); // typically calls noWapContentPlease ..
 			}
 			registerTestResult(page, result, 'header check complete');
-			jobTime(nextBug, 5500);
 		}else if(/http:\/\//.test(res.url)){
 			httpResources.push(res.url);
 	    	//console.log('HTTP URL! '+res.url);
@@ -355,23 +353,28 @@ function createPage(){
 		if(url === testsFile){
 			//console.log(page.content);
 		}
+		if(resultRegistered){
+			return;
+		}
 		if(xhrTestUrl){
 			if(page.content === '<html><head></head><body></body></html>'){
 				// would be a lot nicer to discover this by MIME type in the onResourceReceived (or onResourceError) handlers, but..
 				registerTestResult(page, false, 'WAP content (empty page)');
-				jobTime(nextBug, 5500);
+				console.log(page.url);
+				xhrTestUrl = '';
 			}else{
 				//console.log(page.content)
 				registerTestResult(page, true, 'no WAP here, right?!');
+				console.log(page.url)
 				xhrTestUrl = '';
 				// if next page is XHR, loading appears to fail *and* we'd see the source of the previous page.. Hence, load about:blank first
 				page.open('about:blank');
-				jobTime(nextBug, 5500);
 			}
 		}else if(bugdata[bug].testType === 'mixed-content-blocking'){
 			setTimeout(function(){
-				registerTestResult(page, !httpResources.length,  (httpResources.length ? httpResources.length + ' http: resources loaded on this https: page' : ''));
-				nextBug();
+				if(!resultRegistered){
+					registerTestResult(page, !httpResources.length,  (httpResources.length ? httpResources.length + ' http: resources loaded on this https: page' : ''));
+				}
 			}, 2000)
 		}else{
 			if(!isFrame)jobTime(runTestStep, 800);
