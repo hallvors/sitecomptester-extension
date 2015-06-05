@@ -91,3 +91,26 @@ Tests can always assume that these methods are available:
 
 * **cssCheck(*classNameList*, *propertiesThatMustExist*)** - method that returns true if one of the class names has one of the properties. *This method is less used than the others and might be dropped or changed*.
 
+
+## Using testsites.py to generate screenshots
+
+[datagenerator/testsites.py](https://github.com/hallvors/sitecomptester-extension/blob/master/datagenerator/testsites.py) takes a list of URLs, uses Mozilla Marionette to run through it (loading each URL twice with different User-Agents or settings) and gathers statistics and screenshots.
+
+To use it:
+
+1. Run a Firefox version with Marionette enabled. For example, you can use a Nightly build with a command line similar to this one:
+```
+c:\Program Files (x86)\Nightly\firefox.exe -marionette -no-remote -P
+```
+2. To set the size of screenshots, just resize the browser window before running the script.
+
+3. Create a plain text file listing all the URLs you want to play through, separated by newlines:
+```txt
+http://example.com
+http://example.net
+```
+Save this file as ```sites.txt``` in a new, empty folder you've created.
+
+4. Run ```python testsites.py -o /path/to/dir/where/sitestxt/is/```  - that should start running through the URLs and write statistics and screenshots to the folder sites.txt is found in. By default it will take two screenshots with different UAs, to tweak the UAs see the ```spoof_*``` methods like ```spoof_firefox_android()``` and friends. 
+
+5. The script compares the generated screenshot. If they have small or large differences, a comparison screenshot is generated (joining the two into a single .png file with a black line between the two screenshots). These combined screenshots are placed in the "comp" folder next to sites.txt.
