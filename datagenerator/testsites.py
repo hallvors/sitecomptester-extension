@@ -3,7 +3,7 @@ import base64, json, re, os, subprocess, time, urlparse, tldextract, difflib, ar
 
 import pdb
 
-dirname = 'c:\\mozilla\\testing\\test\\'
+dirname = 'c:\\mozilla\\testing\\jp-V\\'
 scriptdir = os.path.dirname(os.path.realpath(__file__)) + os.path.sep
 filename = dirname + 'sites.txt'
 DB_SERVER = 'http://compatentomology.com.paas.allizom.org/data/'
@@ -153,18 +153,22 @@ return cm;
     # The console data comes in a somewhat messy format -
     # the 'message' string contains all the data we're interested in
     # but it takes some parsing to actually get it..
-    print(len(console_data))
-    print(console_data)
     if 'js_problems' not in results:
         results['js_problems'] = []
     if 'css_problems' not in results:
         results['css_problems'] = []
-    rx_message = re.compile(': "(.+)" \{file: "(.+)" line: (\d+) column: (\d+) source: "(.+)"\}', re.DOTALL)
+    if 'ssl_problems' not in results:
+        results['ssl_problems'] = []
+    rx_message = re.compile(': "(.+)" \{file: "(.+)" line: (\d+)(?: column: (\d+) source: "(.+)"|)\}', re.DOTALL)
     rx_propval = re.compile('([\w-]+)\s*:\s*(.+)')
     rx_propval_alternate = re.compile('in parsing value for ["\'](.+)["\'].*source: "(.+)"')
+    seen_messages = [] # we don't need more than one instance of each message..
     for error in console_data:
         if 'character encoding of the HTML document' in error['message']:
+            continue # we may one day want to track this, but..
+        if error['message'] in seen_messages:
             continue
+        seen_messages.append(error['message'])
         try:
             match = re.search(rx_message, error['message'])
             print(error['message'])
@@ -178,6 +182,8 @@ return cm;
                         # does not have property:value format
                         match2 = re.search(rx_propval_alternate, error['message'])
                         results['css_problems'].append({'file':match.group(2) + ':' + match.group(3) + ':' + match.group(4), 'property': match2.group(1), 'value': match2.group(2), 'selector': None})
+                elif 'signature algorithms' in error['message']:
+                    results['ssl_problems'].append({'message':match.group(1), 'file':match.group(2)})
                 else:
                     results['js_problems'].append({'message': match.group(1) + ' - ' + match.group(5), 'stack':match.group(2) + ':' + match.group(3) + ':' + match.group(4)})
         except Exception,e:
