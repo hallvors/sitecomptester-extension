@@ -1,0 +1,4 @@
+marionette-client
+Pillow
+tldextract
+requests
