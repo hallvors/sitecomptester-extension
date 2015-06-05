@@ -31,6 +31,15 @@ var bugdata = {
         stepInFrame:{2:'bankid_iframe_I_presume'},
         title:"CSP change in behavior regards case sensitivity loading resources - breaks Norwegian BankID authentication"
     },
+    '1170968' : {
+        url:'http://edition.cnn.com/',
+        ua:'FirefoxOS',
+        steps:[function(){
+            var resizeFunc = window.onresize.toString();
+            return !/\.is\("\.iemobile, \.android, \.ios"\)||window\.CNN\.navigation\.\$search\.blur\(\)/.test(resizeFunc)
+        }],
+        title:"CNN blurs search field when on-screen keyboard opens"
+    },
     "1115811": {
         "url": "http://tiscali.it",
         "steps": [
