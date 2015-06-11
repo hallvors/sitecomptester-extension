@@ -323,7 +323,7 @@ function createPage(){
 		}
 	}
 	page.onResourceReceived = function (res) {
-		if(res.status == 301 || res.status == 302)return; // this is just an intermediate redirect response, wait for the real deal
+		if(res.status == 301 || res.status == 302 || res.stage === 'start')return; // this is just an intermediate redirect response, wait for the real deal
 	    //console.log(JSON.stringify(res, null, 4))
 	    //injectJS(page, ua);
 	    var result;
