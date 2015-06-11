@@ -160,20 +160,36 @@ return cm;
     if 'ssl_problems' not in results:
         results['ssl_problems'] = []
     rx_message = re.compile(': "(.+)" \{file: "(.+)" line: (\d+)(?: column: (\d+) source: "(.+)"|)\}', re.DOTALL)
-    rx_propval = re.compile('([\w-]+)\s*:\s*(.+)')
+    rx_propval = re.compile('([\w-]+)\s*:\s*([^;]+)')
     rx_propval_alternate = re.compile('in parsing value for ["\'](.+)["\'].*source: "(.+)"')
     seen_messages = [] # we don't need more than one instance of each message..
     for error in console_data:
         if 'character encoding of the HTML document' in error['message']:
             continue # we may one day want to track this, but..
-        if error['message'] in seen_messages:
+        if 'file: "chrome://'  in error['message'] or 'file: "resource://' in error['message']:
+            # this is Gecko-internal stuff, no point in logging it among site problems
             continue
-        seen_messages.append(error['message'])
+        the_message = error['message'][0:error['message'].rfind(' {file:')] if error['message'].rfind(' {file:') > -1 else error['message']
+        if the_message in seen_messages:
+            print('IGNORE ' + the_message[0:30])
+            continue
+        seen_messages.append(the_message)
+        #pdb.set_trace()
         try:
             match = re.search(rx_message, error['message'])
-            print(error['message'])
+            # Gecko says "JavaScript Warning:" about absolutely everything
+            # We'll do some content sniffing to check what type of problem it
+            # *actually* is
+            js_error_strings = ['TypeError', 'SyntaxError', 'EvalError', 'RangeError', 'ReferenceError', 'IndexSizeError', 'DomstringSizeErr', 'HierarchyRequestErr', 'WrongDocumentErr', 'InvalidCharacterErr', 'NoDataAllowedErr', 'NoModificationAllowedErr', 'NotFoundErr', 'NotSupportedErr', 'InuseAttributeErr', 'InvalidStateErr', 'SyntaxErr', 'InvalidModificationErr', 'NamespaceErr', 'InvalidAccessErr', 'ValidationErr', 'TypeMismatchErr', 'SecurityErr', 'NetworkErr', 'AbortErr', 'UrlMismatchErr', 'QuotaExceededErr', 'TimeoutErr', 'InvalidNodeTypeErr', 'DataCloneErr']
+            # JS errors from:
+            # http://www.ecma-international.org/ecma-262/5.1/#sec-15.11.6
+            # http://www.w3.org/wiki/DOM/domcore/DOMException
+            css_error_strings = ['Error in parsing value', 'Declaration dropped.', 'Skipped to next declaration.']
+            # TODO: we may want to track more CSS issues (but preferably from Compatipede - we don't get
+            # the selector here, and it's important..)
             if match:
-                if 'Error in parsing value' in error['message'] or 'Declaration dropped.' in error['message'] or 'Skipped to next declaration.' in error['message']:
+                # check if the "error" contains one of our "css error signature" strings
+                if [kw for kw in css_error_strings if kw in error['message']]:
                     match2 = re.search(rx_propval, match.group(5))
                     if match2:
                         results['css_problems'].append({'file':match.group(2) + ':' + match.group(3) + ':' + match.group(4), 'property': match2.group(1), 'value': match2.group(2), 'selector': None})
@@ -184,12 +200,13 @@ return cm;
                         results['css_problems'].append({'file':match.group(2) + ':' + match.group(3) + ':' + match.group(4), 'property': match2.group(1), 'value': match2.group(2), 'selector': None})
                 elif 'signature algorithms' in error['message']:
                     results['ssl_problems'].append({'message':match.group(1), 'file':match.group(2)})
-                else:
-                    results['js_problems'].append({'message': match.group(1) + ' - ' + match.group(5), 'stack':match.group(2) + ':' + match.group(3) + ':' + match.group(4)})
+                elif [kw for kw in js_error_strings if kw in error['message']]:
+                    results['js_problems'].append({'message': match.group(1) + ' - ' + (match.group(5) or ''), 'stack':(match.group(2) or '') + ':' + (match.group(3) or '') + ':' + (match.group(4) or '')})
         except Exception,e:
             print('WARNING: exception when parsing console data with regexp')
             print error['message']
             print(e)
+
 
 def inject_js(m):
     m.set_context(m.CONTEXT_CONTENT)
@@ -498,7 +515,7 @@ def save_data_to_db(domain_name, url, testdata_fx, testdata_wk):
         if prop in ['uastring', 'file_desc', 'engine', 'final_url']:
             continue
         # errors from error console are not where we want them..
-        if prop in ['css_problems', 'js_problems']:
+        if prop in ['css_problems', 'js_problems', 'ssl_problems']:
             data[testdata_fx['uastring']]['gecko'][prop] = testdata_fx[prop]
             continue
         data[testdata_fx['uastring']]['gecko']['plugin_results'][prop] = testdata_fx[prop]
@@ -577,7 +594,7 @@ with open(filename, 'r') as handle:
                 fxresults = load_and_check(url, hostname, '')
                 #print('firefox spoof results: ', fxresults)
                 empty_firefox_cache(m)
-                spoof_firefox_android_device_id()
+                spoof_safari_ios()
                 wkresults = load_and_check(url, hostname, 'wk-spoof')
                 #print('AppleWebKit spof results', wkresults)
                 save_data_to_db(hostname, url, fxresults, wkresults)
